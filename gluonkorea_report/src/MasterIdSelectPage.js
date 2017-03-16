@@ -1,7 +1,6 @@
 
 import React, { Component } from 'react';
 import { Form, FormGroup, FormControl, InputGroup, Button, Panel } from 'react-bootstrap';
-
 import TableView from './TableView';
 
 export default class MasterIdSelectPage extends Component {
@@ -25,7 +24,7 @@ export default class MasterIdSelectPage extends Component {
         }
 
         let that = this;
-        let sql = `SELECT [마스터ID] FROM (SELECT [마스터ID] FROM ${this.props.keywordTableName} GROUP BY [마스터ID]) A`;
+        let sql = `SELECT [마스터ID] FROM (SELECT [마스터ID] FROM [${this.props.keywordTableName}] GROUP BY [마스터ID]) A`;
         if ( this.inputText && this.inputText.value ) {
             sql += ' WHERE [마스터ID] like "%' + this.inputText.value + '%"';
         }

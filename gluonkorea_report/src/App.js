@@ -35,6 +35,26 @@ let PAGE_TYPE = {
     MASTERID_SELECT: 'MASTERID_SELECT'
 };
 
+class StatusBar extends Component {
+    constructor() {
+        super();
+        this.state = {
+            msg: ''
+        }
+    }
+
+    render() {
+        if ( !this.state.msg ) {
+            return null;
+        }
+        return (
+            <div className="statusMsgBoxView">
+                <span className="msg">{this.state.msg}</span>
+            </div>
+        );
+    }
+}
+
 class App extends Component {
     constructor() {
         super();
@@ -42,7 +62,6 @@ class App extends Component {
         this.state = {
             showFileUpload: true,
             sql: {},
-            status: {},
             tablesNames: [],
             viewpage: {
                 name: PAGE_TYPE.QUERY
@@ -83,10 +102,7 @@ class App extends Component {
         let that = this;
 
         workerImp.setStatusMsg( function( msg ) {
-            that.setState( {
-                ...that.state,
-                status: { msg: msg }
-            });
+            that.refs.statusBar.setState( { msg: msg } );
         });
         workerImp.setLoadDoneMsg( function( msg ) {
             console.log( 'setLoadDoneMsg', msg.tableName );
@@ -141,7 +157,7 @@ class App extends Component {
             ...this.state,
             viewpage: {
                 name: PAGE_TYPE.TABLE,
-                query: `SELECT * FROM ${tableName} LIMIT 100`,
+                query: `SELECT * FROM [${tableName}] LIMIT 100`,
                 title: tableName
             }
         });
@@ -177,17 +193,6 @@ class App extends Component {
 
     render() {
         let that = this;
-
-        let statusMsg = function() {
-            if ( !that.state.status.msg ) {
-                return null;
-            }
-            return (
-                <div className="statusMsgBoxView">
-                    <span className="msg">{that.state.status.msg}</span>
-                </div>
-            );
-        };
 
         let uploadView = function() {
             return (
@@ -262,7 +267,7 @@ class App extends Component {
                         {pageControl()}
                     </Col>
                 </Row>
-                {statusMsg()}
+                <StatusBar ref="statusBar" />
             </Grid>
         );
     }

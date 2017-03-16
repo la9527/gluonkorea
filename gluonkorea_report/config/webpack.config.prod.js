@@ -51,20 +51,26 @@ module.exports = {
   // You can exclude the *.map files from the build during deployment.
   devtool: 'source-map',
   // In production, we only want to load the polyfills and the app code.
-  entry: [
-    require.resolve('./polyfills'),
-    paths.appIndexJs
-  ],
+  entry: {
+      main: [
+          require.resolve('./polyfills'),
+          paths.appIndexJs
+      ],
+      worker: [
+          paths.appWorkerJs
+      ]
+  },
   output: {
-    // The build folder.
-    path: paths.appBuild,
-    // Generated JS file names (with nested folders).
-    // There will be one main bundle, and one file per asynchronous chunk.
-    // We don't currently advertise code splitting but Webpack supports it.
-    filename: 'static/js/[name].[chunkhash:8].js',
-    chunkFilename: 'static/js/[name].[chunkhash:8].chunk.js',
-    // We inferred the "public path" (such as / or /my-project) from homepage.
-    publicPath: publicPath
+      // Next line is not used in dev but WebpackDevServer crashes without it:
+      path: paths.appBuild,
+      // Add /* filename */ comments to generated require()s in the output.
+      pathinfo: true,
+      // This does not produce a real file. It's just the virtual path that is
+      // served by WebpackDevServer in development. This is the JS bundle
+      // containing code from all our entry points, and the Webpack runtime.
+      filename: 'static/js/[name].bundle.js',
+      // This is the URL that app is served from. We use "/" in development.
+      publicPath: publicPath
   },
   resolve: {
     // This allows you to set a fallback for where Webpack should look for modules.
@@ -190,6 +196,7 @@ module.exports = {
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,
+      chunks: [ 'main' ],
       template: paths.appHtml,
       minify: {
         removeComments: true,

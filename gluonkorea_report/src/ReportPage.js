@@ -112,8 +112,17 @@ export default class ReportPage extends Component {
         console.log( 'COMPLETE LOAD !!!', this.reportQuery);
     }
 
+    onUpdateResize() {
+        this.setState( ...this.state );
+    }
+
     componentDidMount() {
         this.runLoad( this.props.masterId );
+        window.addEventListener('resize', ::this.onUpdateResize);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', ::this.onUpdateResize);
     }
 
     componentWillUpdate(nextProps) {
@@ -144,18 +153,26 @@ export default class ReportPage extends Component {
                         if ( el.res.type === 'error' ) {
                             return (<div className="alert alert-info">{el.res.msg}</div>);
                         }
-                        return (<TableView tableData={el.res.result} title={el.title} msg={el.res.msg}/>);
+                        let title = el.title + ' (' + (el.res.result && el.res.result.length) + '건)';
+                        return (<TableView tableData={el.res.result} title={title} msg={el.res.msg}/>);
                     });
             } else {
                 if ( items.res ) {
                     if ( items.res.type === 'error' ) {
                         tableView = (<div className="alert alert-info">{items.res.msg}</div>);
                     } else {
-                        tableView = (<TableView tableData={items.res.result} title={items.title} msg={items.res.msg}/>);
+                        let title = items.title + ' (' + (items.res.result && items.res.result.length) + '건)';
+                        tableView = (<TableView tableData={items.res.result} title={title} msg={items.res.msg}/>);
                     }
                 }
             }
-            return (<Tab eventKey={name} title={name}>
+
+            let tabHeight = window.outerHeight - 300;
+            let tabbodyStyle = {
+                'height': tabHeight + 'px',
+                'overflow-y': 'scroll'
+            };
+            return (<Tab eventKey={name} title={name} style={tabbodyStyle}>
                     {tableView}
                     </Tab>);
         });

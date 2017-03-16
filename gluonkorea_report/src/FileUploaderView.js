@@ -107,7 +107,7 @@ export default class FileUploaderView extends Component {
             if ( that.state.statusText === LOAD_TYPE.LOADING && that.state.progress ) {
                 return (
                     <Row>
-                        <Col md={3}>
+                        <Col md={5}>
                             <small>{this.props.tableName}</small>
                         </Col>
                         <Col md={7}>
@@ -116,13 +116,17 @@ export default class FileUploaderView extends Component {
                     </Row>
                 );
             }
+            let uploadFileId = 'uploadFile_' + Date.now() + '_' + Math.floor((Math.random() * 100) + 1);
             return (
                 <Row>
-                    <Col md={3}>
+                    <Col md={5}>
                         <small>{this.props.tableName}</small>
                     </Col>
-                    <Col md={7}>
-                        <small><input ref="xlsInput" className="col-xs-12" id="uploadFile" type="file" onChange={::this.fileLoader} /></small>
+                    <Col md={5}>
+                        <div className="filebox">
+                            <label htmlFor={uploadFileId}>CSV 업로드</label>
+                            <input ref="xlsInput" className="col-xs-12" id={uploadFileId} type="file" onChange={::this.fileLoader} />
+                        </div>
                     </Col>
                     <Col md={2}>
                         <small>{this.state.statusText}</small>

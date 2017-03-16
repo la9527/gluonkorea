@@ -229,15 +229,15 @@ class WorkerRunning {
         });
 
         let sql = '';
-        sql += `DROP TABLE IF EXISTS ${tableName};\n`;
-        sql += `CREATE TABLE IF NOT EXISTS ${tableName};\n`;
+        sql += `DROP TABLE IF EXISTS [${tableName}];\n`;
+        sql += `CREATE TABLE IF NOT EXISTS [${tableName}];\n`;
 
         let csvDataLength = csvData.length;
 
         log( sql );
 
         alasql.promise( sql, [csvData] ).then((res)=> {
-            let insertSql = alasql.compile(`INSERT INTO ${tableName} VALUES ?`);
+            let insertSql = alasql.compile(`INSERT INTO [${tableName}] VALUES ?`);
             csvData.map( (el, index) => {
                 insertSql( [ el ] );
                 if ( index % 1000 === 0 ) {
