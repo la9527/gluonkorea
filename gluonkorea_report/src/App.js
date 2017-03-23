@@ -6,7 +6,7 @@ import QueryViewPage from './QueryViewPage';
 import TableViewPage from './TableViewPage';
 import FileUploaderView from './FileUploaderView';
 import MasterIdSelectPage from './MasterIdSelectPage';
-import ReportPage from './ReportPage';
+import ReportViewPage from './ReportViewPage';
 import './App.css';
 import { Grid, Row, Col, Panel, PageHeader, ButtonToolbar, Button } from 'react-bootstrap';
 
@@ -157,8 +157,7 @@ class App extends Component {
             ...this.state,
             viewpage: {
                 name: PAGE_TYPE.TABLE,
-                query: `SELECT * FROM [${tableName}] LIMIT 100`,
-                title: tableName
+                tableName: tableName
             }
         });
     }
@@ -191,16 +190,27 @@ class App extends Component {
         });
     }
 
+    onLoadedCSV( opt ) {
+        console.log( );
+        workerImp.postMessage( { type: 'loaddata', data: opt.data, name: opt.name } );
+    }
+
+    onLoadedExcel( opt ) {
+        console.log( 'onLoadedExcel', opt.name );
+    }
+
     render() {
         let that = this;
 
         let uploadView = function() {
             return (
                     <Panel header="Upload">
-                        <FileUploaderView workerImp={workerImp} tableName={tableNames.G_DAYS} />
-                        <FileUploaderView workerImp={workerImp} tableName={tableNames.G_KEYWORD} />
-                        <FileUploaderView workerImp={workerImp} tableName={tableNames.A_DAYS} />
-                        <FileUploaderView workerImp={workerImp} tableName={tableNames.A_KEYWORD} />
+                        <FileUploaderView name={tableNames.G_DAYS} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV}/>
+                        <FileUploaderView name={tableNames.G_KEYWORD} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
+                        <FileUploaderView name={tableNames.A_DAYS} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
+                        <FileUploaderView name={tableNames.A_KEYWORD} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
+                        <br />
+                        <FileUploaderView name="Template" buttonTitle="템플릿 업로드" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onLoaded={::that.onLoadedExcel} />
                     </Panel>
                 );
         };
@@ -215,15 +225,15 @@ class App extends Component {
                 component = (
                     <MasterIdSelectPage workerImp={workerImp} keywordTableName={tableNames.A_DAYS} onMasterIdClick={::this.onMasterIdClick} />
                 );
-            } else if ( that.state.viewpage.name === PAGE_TYPE.TABLE && that.state.viewpage.query ) {
+            } else if ( that.state.viewpage.name === PAGE_TYPE.TABLE && that.state.viewpage.tableName ) {
                 console.log( 'pageControl :: TABLEVIEW' );
                 component = (
-                    <TableViewPage ref="tableViewPage" workerImp={workerImp} query={that.state.viewpage.query} title={that.state.viewpage.title} />
+                    <TableViewPage ref="tableViewPage" workerImp={workerImp} tableName={this.state.viewpage.tableName}/>
                 );
             } else if ( that.state.viewpage.name === PAGE_TYPE.REPORT ) {
                 console.log('pageControl :: REPORT');
                 component = (
-                    <ReportPage workerImp={workerImp} masterId={that.state.viewpage.masterId} />
+                    <ReportViewPage workerImp={workerImp} masterId={that.state.viewpage.masterId} />
                 );
             } else {
                 console.log( 'pageControl :: QueryViewPage' );

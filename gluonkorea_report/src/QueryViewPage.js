@@ -40,6 +40,18 @@ export default class QueryViewPage extends Component {
         });
     }
 
+    onUpdateResize() {
+        this.setState( ...this.state );
+    }
+
+    componentDidMount() {
+        window.addEventListener('resize', ::this.onUpdateResize);
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('resize', ::this.onUpdateResize);
+    }
+
     render() {
         let that = this;
         let msgBox = function() {
@@ -53,7 +65,11 @@ export default class QueryViewPage extends Component {
             );
         };
 
-        // <textarea ref="sqlTextArea" placeholder="SQL 명령어를 입력하세요." />
+        let tabHeight = window.outerHeight - 400;
+        let tabbodyStyle = {
+            'height': tabHeight + 'px',
+            'overflow-y': 'scroll'
+        };
         return (
             <Grid fluid={true}>
                 <Row>
@@ -67,9 +83,9 @@ export default class QueryViewPage extends Component {
                     </Col>
                 </Row>
                 <Row>
-                    <Panel header="SQL 결과">
+                    <Panel header="SQL 결과" >
                         {msgBox()}
-                        <TableView tableData={this.state.sql.table} />
+                        <TableView style={tabbodyStyle} tableData={this.state.sql.table} />
                     </Panel>
                 </Row>
             </Grid>

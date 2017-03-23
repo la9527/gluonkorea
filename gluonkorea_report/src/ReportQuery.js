@@ -1,6 +1,6 @@
 let QUERYS = {
     // 키워드 리스트
-    "KEYWORD_LIST": "select [그룹명], [상품번호], [노출영역], [키워드], [노출수], [클릭수], [총비용], [전환수량], [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId'",
+    "KEYWORD_LIST": "select [그룹명], [상품번호], [노출영역], [키워드], INTEGER([노출수]) AS [노출수], INTEGER([클릭수]) AS [클릭수], INTEGER([총비용]) AS [총비용], INTEGER([전환수량]) AS [전환수량], INTEGER([전환금액]) AS [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId'",
     // 상품 리스트
     "PRODUCT_GROUP_LIST": "select [상품번호], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId' GROUP BY [상품번호]",
     // 기간별 노출 수
@@ -193,6 +193,15 @@ let QueryList = (tableNameObj) => {
         'Gmarket 상품별': {
             title: 'Gmarket 상품별',
             query: QUERYS.PRODUCT_GROUP_LIST,
+            excelTmplInfo: {
+                sheetName: 'Gmarket_상품별',
+                position: {
+                    startX: 1,
+                    startY: 6,
+                    baseWidth: 11
+                },
+                header: ['마켓구분','상품ID','노출','클릭','총비용','전환매출']
+            },
             params: {
                 table_keyword: TABLENAME.G_KEYWORD,
                 masterId: ''
@@ -201,6 +210,15 @@ let QueryList = (tableNameObj) => {
         'Gmarket 키워드': {
             title: 'Gmarket 키워드',
             query: QUERYS.KEYWORD_LIST,
+            excelTmplInfo: {
+                sheetName: 'Gmarket_키워드',
+                position: {
+                    startX: 1,
+                    startY: 6,
+                    baseWidth: 13
+                },
+                header: ['그룹명','상품번호','노출영역','키워드','노출수','클릭수', '총비용', '전환수량', '전환매출']
+            },
             params: {
                 table_keyword: TABLENAME.G_KEYWORD,
                 masterId: ''
@@ -235,6 +253,15 @@ let QueryList = (tableNameObj) => {
         'Auction 상품별': {
             title: 'Auction 상품별',
             query: QUERYS.PRODUCT_GROUP_LIST,
+            excelTmplInfo: {
+                sheetName: 'Auction_상품별',
+                position: {
+                    startX: 1,
+                    startY: 6,
+                    baseWidth: 11
+                },
+                header: ['마켓구분','상품ID','노출','클릭','총비용','전환매출']
+            },
             params: {
                 table_keyword: TABLENAME.A_KEYWORD,
                 masterId: ''
@@ -243,6 +270,15 @@ let QueryList = (tableNameObj) => {
         'Auction 키워드': {
             title: 'Auction 키워드',
             query: QUERYS.KEYWORD_LIST,
+            excelTmplInfo: {
+                sheetName: 'Auction_키워드',
+                position: {
+                    startX: 1,
+                    startY: 6,
+                    baseWidth: 13
+                },
+                header: ['그룹명','상품번호','노출영역','키워드','노출수','클릭수', '총비용', '전환수량', '전환매출']
+            },
             params: {
                     table_keyword: TABLENAME.A_KEYWORD,
                     masterId: ''

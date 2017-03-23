@@ -18,7 +18,10 @@ export default class FileUploaderView extends Component {
 
     static propTypes = {
         workerImp: React.PropTypes.object,
-        tableName: React.PropTypes.string
+        buttonTitle: React.PropTypes.string,
+        name: React.PropTypes.string,
+        accept: React.PropTypes.string,
+        onLoaded: React.PropTypes.func
     }
 
     fileLoader(e) {
@@ -57,7 +60,7 @@ export default class FileUploaderView extends Component {
         let callFileReader = (fileData) => {
             let fileReader = new FileReader();
             fileReader.onprogress = (e) => {
-                console.log( 'File Loader : (' + e.loaded + ' / ' + e.total + ') - ', fileData.tableName );
+                console.log( 'File Loader : (' + e.loaded + ' / ' + e.total + ') - ', fileData.name );
                 that.setState({
                     ...that.state,
                     statusText: LOAD_TYPE.LOADING,
@@ -77,7 +80,10 @@ export default class FileUploaderView extends Component {
                     ...that.state,
                     statusText: LOAD_TYPE.DONE
                 });
-                that.props.workerImp.postMessage( { type: 'loaddata', data: data, name: fileData.tableName } );
+
+                if ( that.props.onLoaded ) {
+                    that.props.onLoaded( { data: data, name: fileData.name });
+                }
             };
             fileReader.onerror = (e) => {
                 console.error('onError', e, fileData.tableName);
@@ -93,7 +99,7 @@ export default class FileUploaderView extends Component {
             let loadItem = this.loadedFiles[i];
             if ( loadItem.loadtype !== LOAD_TYPE.COMPLETE ) {
                 loadItem.loadtype = LOAD_TYPE.LOADING;
-                loadItem.tableName = this.props.tableName;
+                loadItem.name = this.props.name;
                 callFileReader( loadItem );
                 this.loadedFiles[i] = loadItem;
                 break;
@@ -108,7 +114,7 @@ export default class FileUploaderView extends Component {
                 return (
                     <Row>
                         <Col md={5}>
-                            <small>{this.props.tableName}</small>
+                            <small>{this.props.name}</small>
                         </Col>
                         <Col md={7}>
                             <ProgressBar active now={that.state.progress.now} max={that.state.progress.max} />
@@ -120,12 +126,12 @@ export default class FileUploaderView extends Component {
             return (
                 <Row>
                     <Col md={5}>
-                        <small>{this.props.tableName}</small>
+                        <small>{this.props.name}</small>
                     </Col>
                     <Col md={5}>
                         <div className="filebox">
-                            <label htmlFor={uploadFileId}>CSV 업로드</label>
-                            <input ref="xlsInput" className="col-xs-12" id={uploadFileId} type="file" onChange={::this.fileLoader} />
+                            <label htmlFor={uploadFileId}>{this.props.buttonTitle}</label>
+                            <input ref="xlsInput" className="col-xs-12" id={uploadFileId} type="file" accept={this.props.accept} onChange={::this.fileLoader} />
                         </div>
                     </Col>
                     <Col md={2}>

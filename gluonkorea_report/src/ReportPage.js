@@ -1,27 +1,17 @@
 import React, { Component } from 'react';
-import { Tab, Tabs } from 'react-bootstrap';
+import { Tab, Tabs, Button, ButtonToolbar } from 'react-bootstrap';
 import TableView from './TableView';
-import ReportSqlExec from './ReportSqlExec';
+import FileSaver from 'file-saver';
 
 export default class ReportPage extends Component {
     constructor(props) {
         super(props);
         this.state = {};
-
-        this._reportSqlExec = new ReportSqlExec();
     }
 
     static propTypes = {
-        workerImp: React.PropTypes.object,
+        reportData: React.PropTypes.object,
         masterId: React.PropTypes.string
-    }
-
-    onCompleteLoad() {
-        this.setState( {
-            ...this.state,
-            viewLoading: false
-        });
-        console.log( 'COMPLETE LOAD !!!', this.reportQuery);
     }
 
     onUpdateResize() {
@@ -29,23 +19,6 @@ export default class ReportPage extends Component {
     }
 
     componentDidMount() {
-        let that = this;
-        this._reportSqlExec.setOption({
-            progress: function( prop ) {
-                console.log( prop );
-            },
-            done: function( masterId, data ) {
-                that.reportQuery = data;
-                that.setState( {
-                    ...this.state,
-                    masterId: masterId,
-                    viewLoading: false
-                });
-            },
-            workerImp: this.props.workerImp
-        });
-
-        this._reportSqlExec.run(this.props.masterId);
         window.addEventListener('resize', ::this.onUpdateResize);
     }
 
@@ -53,25 +26,24 @@ export default class ReportPage extends Component {
         window.removeEventListener('resize', ::this.onUpdateResize);
     }
 
-    componentWillUpdate(nextProps) {
-        if ( nextProps.masterId !== this.state.masterId ) {
-            this._reportSqlExec.run( this.props.masterId );
-        }
-    }
-
     tabSelect( tabId ) {
         console.log( 'tabSelect : ', tabId );
     }
 
+    onExcelDownload() {
+        let reportDataJson = JSON.stringify( this.props.reportData, null, '  ' );
+        FileSaver.saveAs( new Blob([reportDataJson], { type: 'text/plain;charset=utf-8' }), "file.json" );
+    }
+
     render() {
         let that = this;
-        if ( !this.reportQuery || this.state.viewLoading ) {
+        if ( !this.props.reportData ) {
             return null;
         }
 
-        let tabNames = Object.getOwnPropertyNames( that.reportQuery );
+        let tabNames = Object.getOwnPropertyNames( that.props.reportData );
         let tabInfo = tabNames.map( (name) => {
-            let items = that.reportQuery[name];
+            let items = that.props.reportData[name];
             let tableView = null;
             if ( items.constructor === Array ) { // isArray Check
                 tableView = items.map( (el) => {
@@ -82,7 +54,7 @@ export default class ReportPage extends Component {
                             return (<div className="alert alert-info">{el.res.msg}</div>);
                         }
                         let title = el.title + ' (' + (el.res.result && el.res.result.length) + '건)';
-                        return (<TableView key={name} tableData={el.res.result} title={title} msg={el.res.msg}/>);
+                        return (<TableView key={title} tableData={el.res.result} title={title} msg={el.res.msg}/>);
                     });
             } else {
                 if ( items.res ) {
@@ -105,9 +77,14 @@ export default class ReportPage extends Component {
                     </Tab>);
         });
         return (
-            <Tabs onSelect={::this.tabSelect} id="reportTab">
-                {tabInfo}
-            </Tabs>
+            <div>
+                <ButtonToolbar>
+                    <Button onClick={::this.onExcelDownload}>Excel 다운로드</Button>
+                </ButtonToolbar>
+                <Tabs onSelect={::this.tabSelect} id="reportTab">
+                    {tabInfo}
+                </Tabs>
+            </div>
         );
     }
 }

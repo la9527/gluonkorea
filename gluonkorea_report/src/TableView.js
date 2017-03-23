@@ -5,7 +5,8 @@ export default class TableView extends Component {
     static propTypes = {
         tableData: React.PropTypes.array,
         title: React.PropTypes.string,
-        onCellClick: React.PropTypes.func
+        onCellClick: React.PropTypes.func,
+        style: React.PropTypes.object
     }
 
     componentDidMount() {
@@ -40,7 +41,7 @@ export default class TableView extends Component {
         });
 
         return (
-            <div className="responsive">
+            <div className="responsive" style={this.props.style}>
                 <Table bordered condensed hover>
                     {this.props.title ? (<caption title={this.props.title}>{this.props.title}</caption>) : null}
                     <thead>

@@ -12,44 +12,57 @@ export default class TableViewPage extends Component {
 
     static propTypes = {
         workerImp: React.PropTypes.object,
-        title: React.PropTypes.string,
-        query: React.PropTypes.string,
-        queryValue: React.PropTypes.object
+        tableName: React.PropTypes.string
     }
 
-    runSql( query, value ) {
+    showTable( tableName ) {
         let that = this;
-        that.setState({
-            ...that.state,
-            sql: {
-                table: null,
-                msg: null,
-                query: query
-            }
-        });
-        this.props.workerImp.sendSql(query, value, function (res) {
-            if ( res ) {
-                if (res.type === 'error') {
-                    that.setState({
-                        ...that.state,
-                        sql: {table: null, msg: res.msg, query: query}
-                    });
-                } else {
-                    that.setState({ ...that.state,
-                        sql: {table: res.result, msg: null, query: query}
-                    });
+        let SQL_COUNT = `SELECT COUNT(*) as [COUNT] FROM [${tableName}]`;
+
+        that.props.workerImp.sendSql(SQL_COUNT, function (res) {
+            if ( !res ) return;
+
+            if ( res.type === 'error' ) {
+                that.setState({
+                    ...that.state,
+                    sql: {table: null, msg: res.msg, title: tableName, tableName: tableName}
+                });
+            } else {
+                let nCount = 0;
+                if ( res.result && res.result[0] ) {
+                    nCount = res.result[0].COUNT;
                 }
+
+                let SQL = `SELECT * FROM [${tableName}]`;
+                if ( nCount > 10000) {
+                    SQL += ' LIMIT 10000';
+                }
+
+                let title = `${tableName} (${nCount}건)`;
+                that.props.workerImp.sendSql(SQL, function (res2) {
+                    if (res2.type === 'error') {
+                        that.setState({
+                            ...that.state,
+                            sql: {table: null, msg: res2.msg, title: title, tableName: tableName}
+                        });
+                    } else {
+                        that.setState({
+                            ...that.state,
+                            sql: {table: res2.result, msg: null, title: title, tableName: tableName}
+                        });
+                    }
+                });
             }
         });
     }
 
     componentDidMount() {
-        this.runSql( this.props.query, this.props.queryValue );
+        this.showTable( this.props.tableName );
     }
 
     componentWillUpdate(nextProps) {
-        if ( nextProps.query !== this.state.sql.query ) {
-            this.runSql(nextProps.query);
+        if ( nextProps.tableName !== this.state.sql.tableName ) {
+            this.showTable( this.props.tableName );
         }
     }
 
@@ -67,7 +80,7 @@ export default class TableViewPage extends Component {
         };
 
         return (
-            <Panel header={this.props.title} bsStyle="success" >
+            <Panel header={this.state.sql.title} bsStyle="success" >
                 {msgBox()}
                 <TableView tableData={this.state.sql.table} />
             </Panel>

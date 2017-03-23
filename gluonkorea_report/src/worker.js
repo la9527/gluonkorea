@@ -169,6 +169,10 @@ alasql.fn.FIXED = (type1, number = 0) => {
     return 0;
 };
 
+alasql.fn.INTEGER = (type1) => {
+    return parseInteger(type1);
+};
+
 alasql.fn.WEEK = function(dateStr) {
     let date = new Date(dateStr);
     let onejan = new Date(date.getFullYear(),0,1);

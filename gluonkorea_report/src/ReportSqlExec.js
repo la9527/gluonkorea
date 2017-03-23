@@ -72,7 +72,7 @@ export default class ReportSqlExec {
                         that.option.progress( completeStatusCheck.progress );
                     }
 
-                    if (  completeStatusCheck.isCompleteChk ) {
+                    if ( completeStatusCheck.isCompleteChk ) {
                         if ( that.option.done ) {
                             that.option.done(that.state.masterId, that.reportQuery);
                         }
