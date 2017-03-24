@@ -31,9 +31,14 @@ class ReportExcelPage extends Component {
             console.error( 'SheetName Not found !!!', reportTableData.excelTmplInfo.sheetName );
             return;
         }
-        console.error( 'SheetName - FOUND : ', reportTableData.excelTmplInfo.sheetName );
+        console.log( 'SheetName - FOUND : ', reportTableData.excelTmplInfo.sheetName );
 
         let dataset = reportTableData.res.result;
+        if ( !dataset ) {
+            console.error( 'SheetName - FOUND : ', reportTableData.title, 'RESULT IS NULL !!!' );
+            return;
+        }
+
         let headerNames = reportTableData.excelTmplInfo.header;
 
         let { startX, startY, baseWidth } = reportTableData.excelTmplInfo.position;
@@ -43,9 +48,6 @@ class ReportExcelPage extends Component {
         }
 
         for ( let y = 0; y < dataset.length - 1; y++ ) {
-            if ( y % 100 === 0 ) {
-                console.log('SHEET COPY TO ', startY+y );
-            }
             sheet.copyTo( startY, startX, startY+y+1, startX, 1, baseWidth, GC.Spread.Sheets.CopyToOptions.all );
         }
 
@@ -125,7 +127,7 @@ class ReportExcelPage extends Component {
             if ( reportSheetData.constructor === Array ) { // isArray Check
                 reportSheetData.map( (reportTableData, index) => {
                     let tablePosition = setTableData(sheet, reportTableData, 'Sheet' + tabIndex + 'Table' + index, posY, posX);
-                    posY += (tablePosition.height + 4);
+                    posY += (tablePosition.height + 2);
                     maxWidth = Math.max( maxWidth, tablePosition.width );
                 });
             } else {
