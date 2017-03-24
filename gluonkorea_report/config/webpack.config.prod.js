@@ -87,7 +87,7 @@ module.exports = {
     alias: {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
-      'react-native': 'react-native-web'
+      //'react-native': 'react-native-web'
     }
   },
   
@@ -252,7 +252,11 @@ module.exports = {
   },
   externals: [
     {
-      './cptable': 'var cptable' // xlsx fix
+      './cptable': 'var cptable',
+      'react-native-fs': 'var react-native-fs',
+      'react-native-fetch-blob': 'var react-native-fetch-blob',
+      'vertx': 'var vertx',
+      'react-native': 'var react-native'
     }
   ]
 };

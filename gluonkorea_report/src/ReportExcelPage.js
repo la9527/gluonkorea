@@ -42,11 +42,12 @@ class ReportExcelPage extends Component {
             sheet.setRowCount(startY + dataset.length + 5);
         }
 
-        sheet.suspendPaint();
-        for ( let y = 0; y < dataset.length; y++ ) {
-            sheet.copyTo( startY, startX, startY+y+1, startX, 1, baseWidth, GC.Spread.Sheets.CopyToOptions.style );
+        for ( let y = 0; y < dataset.length - 1; y++ ) {
+            if ( y % 100 === 0 ) {
+                console.log('SHEET COPY TO ', startY+y );
+            }
+            sheet.copyTo( startY, startX, startY+y+1, startX, 1, baseWidth, GC.Spread.Sheets.CopyToOptions.all );
         }
-        sheet.resumePaint();
 
         let tableTheme = new GC.Spread.Sheets.Tables.TableTheme();
 
@@ -71,6 +72,8 @@ class ReportExcelPage extends Component {
     viewTemplateSetExcelData( reportData ) {
         let that = this;
         let tabNames = Object.getOwnPropertyNames( reportData );
+        that._spread.suspendPaint();
+        that._spread.suspendCalcService(false);
         tabNames.map( (tabName, tabIndex) => {
             let reportSheetData = reportData[tabName];
             if ( reportSheetData.constructor === Array ) { // isArray Check
@@ -81,6 +84,8 @@ class ReportExcelPage extends Component {
                 that.sheetReportUpdate('Sheet' + tabIndex + 'Table1', reportSheetData);
             }
         });
+        that._spread.resumeCalcService(true);
+        that._spread.resumePaint();
     }
 
     viewExcelData(reportData) {
@@ -135,11 +140,12 @@ class ReportExcelPage extends Component {
     }
 
     saveAsFile() {
-        var json = this._spread.toJSON();
+        let json = this._spread.toJSON( {includeBindingSource: true} );
+        let fileName = this.props.masterId + '.xlsx';
 
         // here is excel IO API
         this._excelIo.save(json, function (blob) {
-            FileSaver.saveAs(blob, "testSave.xlsx");
+            FileSaver.saveAs(blob, fileName);
         }, function (e) {
             // process error
             console.log(e);
@@ -155,8 +161,15 @@ class ReportExcelPage extends Component {
                 console.log( 'TEMPLATE LOADED', response );
                 that._excelIo.open(response.data, function(json) {
                     console.log( 'LOAD COMPLETE !!!' );
+                    that._spread.suspendPaint();
                     that._spread.fromJSON( json );
-                    that.viewTemplateSetExcelData(that.props.reportData);
+                    that._spread.resumePaint();
+
+                    setTimeout( function() {
+                        if ( that._reportData ) {
+                            that.viewTemplateSetExcelData(that._reportData);
+                        }
+                    }, 1);
                 }, function( error ) {
                     alert(error.errorMessage);
                 });
@@ -168,11 +181,12 @@ class ReportExcelPage extends Component {
 
     onJsonLoadClick() {
         let that = this;
-        axios.get('xlsxTemplate/reportData.json')
+        axios.get('xlsxTemplate/09gage.json')
             .then(function(response) {
                 console.log( 'JSON LOADED', response );
                 //that.viewExcelData(response.data);
-                that.viewTemplateSetExcelData(response.data);
+                that._reportData = response.data;
+                that.onTemplateLoadClick();
             })
             .catch(function(error) {
                 console.error( 'TEMPLATE LOAD FAIL.', error );
@@ -181,8 +195,9 @@ class ReportExcelPage extends Component {
 
     onJsonSaveClick() {
         if ( this.props.reportData ) {
+            let fileName = this.props.masterId + '.json';
             let reportDataJson = JSON.stringify(this.props.reportData, null, '  ');
-            FileSaver.saveAs(new Blob([reportDataJson], {type: 'text/plain;charset=utf-8'}), "file.json");
+            FileSaver.saveAs(new Blob([reportDataJson], {type: 'text/plain;charset=utf-8'}), fileName);
         }
     }
 
@@ -198,13 +213,11 @@ class ReportExcelPage extends Component {
 
     componentDidMount() {
         let that = this;
-        this._spread = new window.GC.Spread.Sheets.Workbook(this.refs.spread, { sheetCount: 1 });
+        this._spread = new window.GC.Spread.Sheets.Workbook( this.refs.spread, { sheetCount: 1 } );
         window.addEventListener('resize', ::this.onUpdateResize);
 
-        if ( this.props.reportData ) {
-            //this.viewExcelData(this.props.reportData);
-            that.viewTemplateSetExcelData(this.props.reportData);
-        }
+        this._reportData = this.props.reportData;
+        that.onTemplateLoadClick();
     }
 
     componentWillUnmount() {
@@ -212,7 +225,7 @@ class ReportExcelPage extends Component {
     }
 
     render() {
-        let tabHeight = window.outerHeight - 400;
+        let tabHeight = window.outerHeight - 340;
         let spreadStyle = {
             'width': '100%',
             'height': tabHeight + 'px',
@@ -222,11 +235,11 @@ class ReportExcelPage extends Component {
         return (
             <div>
                 <ButtonToolbar>
-                    <Button onClick={::this.onTemplateLoadClick}>Template Load</Button>
                     <Button onClick={::this.onJsonLoadClick}>JSON Load</Button>
                     <Button onClick={::this.onJsonSaveClick}>JSON Save</Button>
-                    <Button onClick={::this.saveAsFile}>Template Save 테스트</Button>
-                    <Button onClick={::this.onViewChange}>Excel 데이터만 노출</Button>
+                    <Button onClick={::this.saveAsFile}>Excel 파일 저장</Button>
+                    <Button onClick={::this.onViewChange}>조회한 데이터만 처리</Button>
+                    <Button onClick={::this.onTemplateLoadClick}>템플릿 형식</Button>
                 </ButtonToolbar>
                 <hr />
                 <div style={spreadStyle} ref="spread" />

@@ -68,7 +68,7 @@ export default class QueryViewPage extends Component {
         let tabHeight = window.outerHeight - 400;
         let tabbodyStyle = {
             'height': tabHeight + 'px',
-            'overflow-y': 'scroll'
+            'overflowY': 'scroll'
         };
         return (
             <Grid fluid={true}>

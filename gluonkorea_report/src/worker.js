@@ -109,7 +109,7 @@ function csvParser( text, opts ) {
             rows.push(a);
         }
 
-        if ( opt.onProgress && rows.length % 1000 === 0 ) {
+        if ( opt.onProgress && rows.length % 2000 === 0 ) {
             opt.onProgress( 'CSV Parsing ' + rows.length );
         }
     }
@@ -167,6 +167,23 @@ alasql.fn.FIXED = (type1, number = 0) => {
         }
     } catch( e ) {}
     return 0;
+};
+
+alasql.fn.DATEFIX = (type1) => {
+    // 2017.1.1 -> 2017.01.01
+    if ( !type1 ) return type1;
+
+    let item = type1.split('.');
+    if ( item.length === 3 ) {
+        if ( item[1].length == 1 ) {
+            item[1] = '0' + item[1];
+        }
+        if ( item[2].length == 1 ) {
+            item[2] = '0' + item[2];
+        }
+        return item.join('.');
+    }
+    return type1;
 };
 
 alasql.fn.INTEGER = (type1) => {

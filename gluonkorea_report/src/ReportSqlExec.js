@@ -63,21 +63,33 @@ export default class ReportSqlExec {
                     element[i].params.masterId = that.state.masterId;
                 }
                 let query = queryReplace(element[i].query, element[i].params);
-                that.option.workerImp.sendSql(query, function (res) {
-                    element[i].res = res;
-                    element[i].status = QUERY_STATUS.DONE;
 
-                    let completeStatusCheck = checkComplete();
-                    if ( that.option.progress ) {
-                        that.option.progress( completeStatusCheck.progress );
-                    }
+                let runMainQuery = () => {
+                    that.option.workerImp.sendSql(query, function (res) {
+                        element[i].res = res;
+                        element[i].status = QUERY_STATUS.DONE;
 
-                    if ( completeStatusCheck.isCompleteChk ) {
-                        if ( that.option.done ) {
-                            that.option.done(that.state.masterId, that.reportQuery);
+                        let completeStatusCheck = checkComplete();
+                        if (that.option.progress) {
+                            that.option.progress(completeStatusCheck.progress);
                         }
-                    }
-                });
+
+                        if (completeStatusCheck.isCompleteChk) {
+                            if (that.option.done) {
+                                that.option.done(that.state.masterId, that.reportQuery);
+                            }
+                        }
+                    });
+                };
+
+                if ( element[i].preQuery ) {
+                    let preQuery = queryReplace(element[i].preQuery, element[i].params);
+                    that.option.workerImp.sendSql(preQuery, function () {
+                        runMainQuery();
+                    });
+                } else {
+                    runMainQuery();
+                }
                 return true;
             }
             return false;

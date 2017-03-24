@@ -7,6 +7,7 @@ import TableViewPage from './TableViewPage';
 import FileUploaderView from './FileUploaderView';
 import MasterIdSelectPage from './MasterIdSelectPage';
 import ReportViewPage from './ReportViewPage';
+import MultiFileLoad from './MultiFileLoad';
 import './App.css';
 import { Grid, Row, Col, Panel, PageHeader, ButtonToolbar, Button } from 'react-bootstrap';
 
@@ -190,6 +191,11 @@ class App extends Component {
         });
     }
 
+    onMultiFileLoad() {
+        let multiFileLoad = new MultiFileLoad( workerImp );
+        multiFileLoad.run();
+    }
+
     onLoadedCSV( opt ) {
         console.log( );
         workerImp.postMessage( { type: 'loaddata', data: opt.data, name: opt.name } );
@@ -264,6 +270,9 @@ class App extends Component {
                 </Row>
                 <Row>
                     <Col xs={3}>
+                        <ButtonToolbar>
+                            <Button bsSize="sm" onClick={::this.onMultiFileLoad}>정의된 위치의 Report 파일 적용</Button>
+                        </ButtonToolbar>
                         {uploadView()}
                         <hr />
                         <ButtonToolbar>

@@ -2,12 +2,26 @@ let QUERYS = {
     // 키워드 리스트
     "KEYWORD_LIST": "select [그룹명], [상품번호], [노출영역], [키워드], INTEGER([노출수]) AS [노출수], INTEGER([클릭수]) AS [클릭수], INTEGER([총비용]) AS [총비용], INTEGER([전환수량]) AS [전환수량], INTEGER([전환금액]) AS [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId'",
     // 상품 리스트
-    "PRODUCT_GROUP_LIST": "select [상품번호], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId' GROUP BY [상품번호]",
+    "PRODUCT_GROUP_LIST": "select '$marketName' as [마켓구분], [상품번호], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId' GROUP BY [상품번호]",
     // 기간별 노출 수
-    "DAYS_LIST":
-        "SELECT DAY([기간]) as [요일], WEEK([기간]) as [주차], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] FROM [$table_day] \
+    "DAYS_LIST_OLD":
+        "SELECT DAY([기간]) as [요일], WEEK([기간]) as [주차], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] \
+         FROM [$table_day] \
          WHERE [마스터ID] = '$masterId' \
          GROUP BY [기간]",
+    "PRE_DAYS_LIST": "DROP TABLE IF EXISTS DAYS; CREATE TABLES DAYS; SELECT DATEFIX([기간]) as DT INTO DAYS from [$table_day] group by [기간]",
+    "DAYS_LIST":
+        "SELECT WEEK(B.DT) as [주차], B.DT as [날짜], DAY(B.DT) as [요일],  A.t1 as [노출수], A.t2 as [클릭수], A.t3 as [총비용], A.t4 as [전환수량], A.t5 as [전환금액] \
+         FROM ( \
+            SELECT DATEFIX([기간]) as DT, GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 \
+            FROM [$table_day] \
+            WHERE [마스터ID] = '$masterId' \
+            GROUP BY [기간] \
+         ) A \
+         OUTER JOIN \
+             [DAYS] B \
+         ON A.DT = B.DT \
+         ORDER BY B.DT",
     // 주간별 리스트
     "WEEK_LIST":
         "SELECT C.wk as [주차], GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환금액] \
@@ -183,6 +197,15 @@ let QueryList = (tableNameObj) => {
             },
             {
                 title: '일별 광고 추이',
+                excelTmplInfo: {
+                    sheetName: 'Gmarket',
+                    position: {
+                        startX: 1,
+                        startY: 27,
+                        baseWidth: 14
+                    },
+                    header: ['주차','일자','노출','클릭','총비용','전환수','전환매출']
+                },
                 query: QUERYS.DAYS_LIST,
                 params: {
                     table_day: TABLENAME.G_DAYS,
@@ -204,6 +227,7 @@ let QueryList = (tableNameObj) => {
             },
             params: {
                 table_keyword: TABLENAME.G_KEYWORD,
+                marketName: 'Gmarket',
                 masterId: ''
             }
         },
@@ -243,7 +267,17 @@ let QueryList = (tableNameObj) => {
             },
             {
                 title: 'Auction 일별',
+                excelTmplInfo: {
+                    sheetName: 'Auction',
+                    position: {
+                        startX: 1,
+                        startY: 27,
+                        baseWidth: 14
+                    },
+                    header: ['주차','일자','노출','클릭','총비용','전환수','전환매출']
+                },
                 query: QUERYS.DAYS_LIST,
+                preQuery: QUERYS.PRE_DAYS_LIST,
                 params: {
                     table_day: TABLENAME.A_DAYS,
                     masterId: ''
@@ -264,6 +298,7 @@ let QueryList = (tableNameObj) => {
             },
             params: {
                 table_keyword: TABLENAME.A_KEYWORD,
+                marketName: 'Auction',
                 masterId: ''
             }
         },
