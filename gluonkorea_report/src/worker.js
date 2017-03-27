@@ -5,6 +5,20 @@ let logOnOff = false;
 
 let log = logOnOff ? console.log.bind(console) : function() {};
 
+Date.prototype.getWeekOfMonth = function(exact) {
+    let month = this.getMonth()
+        , year = this.getFullYear()
+        , firstWeekday = new Date(year, month, 1).getDay()
+        , lastDateOfMonth = new Date(year, month + 1, 0).getDate()
+        , offsetDate = this.getDate() + firstWeekday - 1
+        , index = 1 // start index at 0 or 1, your choice
+        , weeksInMonth = index + Math.ceil((lastDateOfMonth + firstWeekday - 7) / 7)
+        , week = index + Math.floor(offsetDate / 7)
+        ;
+    if (exact || week < 2 + index) return week;
+    return week === weeksInMonth ? index + 5 : week;
+};
+
 function csvParser( text, opts ) {
     let opt = {
         separator: ',',
@@ -142,6 +156,30 @@ alasql.aggr.GROUPSUM = (v,s,stage) => {
     return parseInteger(s);
 };
 
+alasql.aggr.GROUPDATEMAX = (v,s,stage) => {
+    if ( stage === 1 ) {
+        if ( v === null ) return null;
+        return v;
+    }
+    if( stage === 2 ) {
+        if ( v === null || s === null ) return null;
+        return new Date(s) > new Date(v) ? s : v;
+    }
+    return s;
+};
+
+alasql.aggr.GROUPDATEMIN = (v,s,stage) => {
+    if ( stage === 1 ) {
+        if ( v === null ) return null;
+        return v;
+    }
+    if( stage === 2 ) {
+        if ( v === null || s === null ) return null;
+        return new Date(s) < new Date(v) ? s : v;
+    }
+    return s;
+};
+
 alasql.fn.DAY = (dateStr) => {
     let rt = null;
     if( dateStr === null ) return null;
@@ -197,9 +235,7 @@ alasql.fn.INTEGER = (type1) => {
 };
 
 alasql.fn.WEEK = function(dateStr) {
-    let date = new Date(dateStr);
-    let onejan = new Date(date.getFullYear(),0,1);
-    return (Math.ceil((((date - onejan) / 86400000) + onejan.getDay()+1)/7)) + '주';
+    return (new Date(dateStr).getWeekOfMonth( true )) + '주';
 };
 
 class WorkerRunning {

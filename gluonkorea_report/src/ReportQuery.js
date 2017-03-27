@@ -4,12 +4,6 @@ let QUERYS = {
     // 상품 리스트
     "PRODUCT_GROUP_LIST": "select '$marketName' as [마켓구분], [상품번호], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId' GROUP BY [상품번호]",
     // 기간별 노출 수
-    "DAYS_LIST_OLD":
-        "SELECT DAY([기간]) as [요일], WEEK([기간]) as [주차], \
-            GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] \
-         FROM [$table_day] \
-         WHERE [마스터ID] = '$masterId' \
-         GROUP BY [기간]",
     "PRE_DAYS_LIST": "DROP TABLE IF EXISTS DAYS; CREATE TABLES DAYS; SELECT DATEFIX([기간]) as DT INTO DAYS from [$table_day] group by [기간]",
     "DAYS_LIST":
         "IF EXISTS(SELECT * FROM [$table_day] WHERE [마스터ID] = '$masterId') \
@@ -41,10 +35,10 @@ let QUERYS = {
             ORDER BY B.DT",
     // 주간별 리스트
     "WEEK_LIST":
-        "SELECT C.wk as [주차], GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환금액] \
+        "SELECT C.wk as [주차], (GROUPDATEMIN(C.dt) + ' ~ ') as [시작일자], GROUPDATEMAX(C.dt) as [마지막일자], GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환매출] \
          FROM \
          ( \
-            SELECT WEEK([기간]) as wk, GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 FROM [$table_day] \
+            SELECT WEEK([기간]) as wk, [기간] as dt, GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 FROM [$table_day] \
             WHERE [마스터ID] = '$masterId' \
             GROUP BY [기간] \
         ) C \
@@ -76,7 +70,7 @@ let QUERYS = {
             A.DT = B.DT",
     // 전체 주간 리스트
     'ALL_WEEK_LIST':
-        "SELECT C.wk as [주차], GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환금액] \
+        "SELECT C.wk as [주차], GROUPMIN(C.t1), GROUPMAX(C.t1), GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환금액] \
          FROM \
          ( \
             SELECT WEEK(A.DT) as wk, A.DT as dt, (A.t1 + B.t1) as t1, (A.t2 + B.t2) as t2, (A.t3 + B.t3) as t3, (A.t4 + B.t4) as t4, (A.t5 + B.t5) as t5 FROM \
@@ -204,7 +198,16 @@ let QueryList = (tableNameObj) => {
                 params: {
                     table_day: TABLENAME.G_DAYS,
                     masterId: ''
-                }
+                },
+                excelTmplInfo: {
+                    sheetName: 'Gmarket',
+                    position: {
+                        startX: 1,
+                        startY: 5,
+                        baseWidth: 7
+                    },
+                    fixHeight: 6
+                },
             },
             {
                 title: '요일별 광고 추이',
@@ -223,6 +226,7 @@ let QueryList = (tableNameObj) => {
                         startY: 27,
                         baseWidth: 14
                     },
+                    fixHeight: 31,
                     header: ['주차','일자','노출','클릭','총비용','전환수','전환매출']
                 },
                 query: QUERYS.DAYS_LIST,
@@ -274,6 +278,15 @@ let QueryList = (tableNameObj) => {
                 params: {
                     table_day: TABLENAME.A_DAYS,
                     masterId: ''
+                },
+                excelTmplInfo: {
+                    sheetName: 'Auction',
+                    position: {
+                        startX: 1,
+                        startY: 5,
+                        baseWidth: 8
+                    },
+                    fixHeight: 6
                 }
             },
             {
@@ -293,7 +306,8 @@ let QueryList = (tableNameObj) => {
                         startY: 27,
                         baseWidth: 14
                     },
-                    header: ['주차','일자','노출','클릭','총비용','전환수','전환매출']
+                    header: ['주차','일자','노출','클릭','총비용','전환수','전환매출'],
+                    fixHeight: 31
                 },
                 query: QUERYS.DAYS_LIST,
                 params: {

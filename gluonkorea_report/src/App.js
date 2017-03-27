@@ -191,8 +191,18 @@ class App extends Component {
         });
     }
 
-    onMultiFileLoad() {
+    onMultiFileLoad1M() {
         let multiFileLoad = new MultiFileLoad( workerImp );
+        multiFileLoad.run();
+    }
+
+    onMultiFileLoad2M() {
+        let multiFileLoad = new MultiFileLoad( workerImp, {
+            [tableNames.A_DAYS]: 'csvFiles/2_A_DAYS.csv',
+            [tableNames.A_KEYWORD]: 'csvFiles/2_A_KEYWORD.csv',
+            [tableNames.G_DAYS]: 'csvFiles/2_G_DAYS.csv',
+            [tableNames.G_KEYWORD]: 'csvFiles/2_G_KEYWORD.csv'
+        } );
         multiFileLoad.run();
     }
 
@@ -271,7 +281,8 @@ class App extends Component {
                 <Row>
                     <Col xs={3}>
                         <ButtonToolbar>
-                            <Button bsSize="sm" onClick={::this.onMultiFileLoad}>정의된 위치의 Report 파일 적용</Button>
+                            <Button bsSize="sm" onClick={::this.onMultiFileLoad1M}>Report 파일 적용(1M)</Button>
+                            <Button bsSize="sm" onClick={::this.onMultiFileLoad2M}>Report 파일 적용(2M)</Button>
                         </ButtonToolbar>
                         {uploadView()}
                         <hr />
