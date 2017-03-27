@@ -5,23 +5,40 @@ let QUERYS = {
     "PRODUCT_GROUP_LIST": "select '$marketName' as [마켓구분], [상품번호], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] from [$table_keyword] WHERE [마스터ID] = '$masterId' GROUP BY [상품번호]",
     // 기간별 노출 수
     "DAYS_LIST_OLD":
-        "SELECT DAY([기간]) as [요일], WEEK([기간]) as [주차], GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] \
+        "SELECT DAY([기간]) as [요일], WEEK([기간]) as [주차], \
+            GROUPSUM([노출수]) as [노출수], GROUPSUM([클릭수]) as [클릭수], GROUPSUM([총비용]) as [총비용], GROUPSUM([전환수량]) as [전환수량], GROUPSUM([전환금액]) as [전환금액] \
          FROM [$table_day] \
          WHERE [마스터ID] = '$masterId' \
          GROUP BY [기간]",
     "PRE_DAYS_LIST": "DROP TABLE IF EXISTS DAYS; CREATE TABLES DAYS; SELECT DATEFIX([기간]) as DT INTO DAYS from [$table_day] group by [기간]",
     "DAYS_LIST":
-        "SELECT WEEK(B.DT) as [주차], B.DT as [날짜], DAY(B.DT) as [요일],  A.t1 as [노출수], A.t2 as [클릭수], A.t3 as [총비용], A.t4 as [전환수량], A.t5 as [전환금액] \
-         FROM ( \
-            SELECT DATEFIX([기간]) as DT, GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 \
-            FROM [$table_day] \
-            WHERE [마스터ID] = '$masterId' \
-            GROUP BY [기간] \
-         ) A \
-         OUTER JOIN \
-             [DAYS] B \
-         ON A.DT = B.DT \
-         ORDER BY B.DT",
+        "IF EXISTS(SELECT * FROM [$table_day] WHERE [마스터ID] = '$masterId') \
+             SELECT WEEK(B.DT) as [주차], B.DT as [날짜], DAY(B.DT) as [요일], \
+                (CASE WHEN A.t1 IS NOT NULL THEN A.t1 ELSE 0 END) as [노출수], \
+                (CASE WHEN A.t2 IS NOT NULL THEN A.t2 ELSE 0 END) as [클릭수], \
+                (CASE WHEN A.t3 IS NOT NULL THEN A.t3 ELSE 0 END) as [총비용], \
+                (CASE WHEN A.t4 IS NOT NULL THEN A.t4 ELSE 0 END) as [전환수량], \
+                (CASE WHEN A.t5 IS NOT NULL THEN A.t5 ELSE 0 END) as [전환금액] \
+             FROM ( \
+                SELECT DATEFIX([기간]) as DT, GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 \
+                FROM [$table_day] \
+                WHERE [마스터ID] = '$masterId' \
+                GROUP BY [기간] \
+             ) A \
+             OUTER JOIN [DAYS] B \
+                ON A.DT = B.DT \
+             ORDER BY B.DT \
+        ELSE \
+            SELECT \
+                WEEK(B.DT) as [주차], B.DT as [날짜], DAY(B.DT) as [요일], \
+                    (0) as [노출수], \
+                    (0) as [클릭수], \
+                    (0) as [총비용], \
+                    (0) as [전환수량], \
+                    (0) as [전환금액] \
+            FROM \
+                DAYS B \
+            ORDER BY B.DT",
     // 주간별 리스트
     "WEEK_LIST":
         "SELECT C.wk as [주차], GROUPSUM(C.t1) as [노출수], GROUPSUM(C.t2) as [클릭수], GROUPSUM(C.t3) as [총비용], GROUPSUM(C.t4) as [전환수량], GROUPSUM(C.t5) as [전환금액] \
@@ -144,10 +161,12 @@ let QueryList = (tableNameObj) => {
             {
                 title: '종합요약',
                 query: QUERYS.ALL_SUMMARY,
+                preQuery: QUERYS.PRE_DAYS_LIST,
                 params: {
                     table_a_keyword: TABLENAME.A_KEYWORD,
                     table_b_keyword: TABLENAME.G_KEYWORD,
-                    masterId: ''
+                    masterId: '',
+                    table_day: TABLENAME.A_DAYS
                 }
             },
             {
@@ -277,7 +296,6 @@ let QueryList = (tableNameObj) => {
                     header: ['주차','일자','노출','클릭','총비용','전환수','전환매출']
                 },
                 query: QUERYS.DAYS_LIST,
-                preQuery: QUERYS.PRE_DAYS_LIST,
                 params: {
                     table_day: TABLENAME.A_DAYS,
                     masterId: ''

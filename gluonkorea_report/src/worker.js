@@ -132,9 +132,11 @@ let parseInteger = (v) => {
 
 alasql.aggr.GROUPSUM = (v,s,stage) => {
     if ( stage === 1 ) {
+        if ( v === null ) return null;
         return parseInteger( v );
     }
     if( stage === 2 ) {
+        if ( v === null || s === null ) return null;
         return parseInteger( s ) + parseInteger( v );
     }
     return parseInteger(s);
@@ -142,6 +144,7 @@ alasql.aggr.GROUPSUM = (v,s,stage) => {
 
 alasql.fn.DAY = (dateStr) => {
     let rt = null;
+    if( dateStr === null ) return null;
     try {
         rt = "일월화수목금토".charAt((new Date(dateStr)).getDay());
     } catch( e ) {}
@@ -151,9 +154,11 @@ alasql.fn.DAY = (dateStr) => {
 alasql.fn.customPercent = (type1, type2) => {
     try {
         if (type1 && type2) {
+            if ( type1 === null || type2 === null ) return null;
             return ((parseInt(type1, 10) / parseInt(type2, 10)) * 100).toFixed(1);
         }
         if (type1) {
+            if ( type1 == null ) return null;
             return (parseFloat(type1, 10) * 100).toFixed(1);
         }
     } catch( e ) {}
@@ -162,6 +167,7 @@ alasql.fn.customPercent = (type1, type2) => {
 
 alasql.fn.FIXED = (type1, number = 0) => {
     try {
+        if ( type1 === null ) return null;
         if (type1) {
             return (parseFloat(type1, 10)).toFixed(number);
         }
@@ -231,14 +237,37 @@ class WorkerRunning {
         let that = this;
 
         !noMsg && that.statusMsg( 'Query Running...' );
-        alasql.promise( sql, value ? [ value ] : undefined ).then((res)=> {
-            !noMsg && that.statusMsg( 'Query Complete...[' + sql  + ']');
-            that.sendPostMsg({type:'sql', res: res, index: index })
-        }).catch((error) => {
-            console.log( error );
+        let promise = alasql.promise( sql, value ? [ value ] : undefined );
+
+        let errorFunc = (error) => {
             !noMsg && that.statusMsg( 'Query Error...' );
             that.sendPostMsg({type:'error', msg: (error + ''), index: index });
+        }
+
+        let endTimeout = false;
+        let timeout = setTimeout( () => {
+            endTimeout = true;
+            console.log( 'TIMEOUT DATA ', sql );
+            errorFunc('Query timoeut....');
+        }, 5000);
+
+        promise.then((res)=> {
+            clearTimeout( timeout );
+            if ( !endTimeout ) {
+                !noMsg && that.statusMsg('Query Complete...[' + sql + ']');
+                that.sendPostMsg({type: 'sql', res: res, index: index});
+            } else {
+                console.log( 'TIMEOUT DATA RESULT : ', sql, res );
+            }
+        }).catch((error) => {
+            clearTimeout( timeout );
+            console.log(error);
+            if ( !endTimeout ) {
+                errorFunc(error);
+            }
         });
+
+
     }
 
     saveToDBFromCSV( allData, tableName ) {

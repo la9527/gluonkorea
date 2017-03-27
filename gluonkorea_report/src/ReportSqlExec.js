@@ -27,22 +27,24 @@ export default class ReportSqlExec {
                 let tabName = tabNames[i];
                 if ( that.reportQuery[tabName].constructor === Array ) {
                     for ( let j in that.reportQuery[tabName] ) {
-                        statusArray.push( that.reportQuery[tabName][j].status );
+                        statusArray.push( { status: that.reportQuery[tabName][j].status, item: that.reportQuery[tabName][j] } );
                         if ( that.reportQuery[tabName][j].status !== QUERY_STATUS.DONE ) {
                             isCompleteChk = false;
                         }
                     }
                 } else {
-                    statusArray.push( that.reportQuery[tabName].status );
+                    statusArray.push( { status: that.reportQuery[tabName].status, item: that.reportQuery[tabName] } );
                     if ( that.reportQuery[tabName].status !== QUERY_STATUS.DONE ) {
                         isCompleteChk = false;
                     }
                 }
             }
+
+            console.log( 'UNDONE', statusArray.filter(el => el.status !== QUERY_STATUS.DONE) );
             return {
                 isCompleteChk: isCompleteChk,
                 progress: {
-                    status: statusArray.filter(el => el === QUERY_STATUS.DONE).length,
+                    status: statusArray.filter(el => el.status === QUERY_STATUS.DONE).length,
                     max: statusArray.length
                 }
             };
@@ -64,8 +66,15 @@ export default class ReportSqlExec {
                 }
                 let query = queryReplace(element[i].query, element[i].params);
 
-                let runMainQuery = () => {
+                let runMainQuery = (subQuery) => {
+                    if ( subQuery ) {
+                        console.log( 'PREQUERY QUERY : ', query );
+                    }
                     that.option.workerImp.sendSql(query, function (res) {
+                        if ( subQuery ) {
+                            console.log( 'PREQUERY QUERY COMPLETE : ', query );
+                        }
+                        element[i].execQuery = query;
                         element[i].res = res;
                         element[i].status = QUERY_STATUS.DONE;
 
@@ -85,10 +94,11 @@ export default class ReportSqlExec {
                 if ( element[i].preQuery ) {
                     let preQuery = queryReplace(element[i].preQuery, element[i].params);
                     that.option.workerImp.sendSql(preQuery, function () {
-                        runMainQuery();
+                        element[i].preExecQuery = preQuery;
+                        runMainQuery(true);
                     });
                 } else {
-                    runMainQuery();
+                    runMainQuery(false);
                 }
                 return true;
             }
