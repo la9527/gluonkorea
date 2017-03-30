@@ -50,64 +50,6 @@ class ReportExcelPage extends Component {
             sheet.copyTo( startY, startX, startY+y+1, startX, 1, baseWidth, GC.Spread.Sheets.CopyToOptions.all );
         }
 
-        let tableTheme = new GC.Spread.Sheets.Tables.TableTheme();
-
-        let style = sheet.getStyle( startY, startX );
-        if ( style ) {
-            let tableStyle = new GC.Spread.Sheets.Tables.TableStyle(style.backColor,
-                null,
-                style.font,
-                style.borderLeft,
-                style.borderTop,
-                style.borderRight,
-                style.borderBottom,
-                style.borderTop,
-                style.borderLeft);
-            tableTheme.wholeTableStyle(tableStyle);
-        }
-
-        console.log( tableName, startY, startX, dataset.title );
-        sheet.tables.addFromDataSource(tableName, startY, startX, dataset, tableTheme, { showHeader: false } );
-
-        if ( reportTableData.excelTmplInfo.fixHeight ) {
-            let fillHeight = reportTableData.excelTmplInfo.fixHeight - dataset.length;
-            if ( fillHeight > 0 ) {
-                sheet.clear( startY + dataset.length, startX, fillHeight, baseWidth, GC.Spread.Sheets.SheetArea.viewport,GC.Spread.Sheets.StorageType.data + GC.Spread.Sheets.StorageType.style);
-            }
-        }
-    }
-
-    sheetReportUpdate2( tableName, reportTableData ) {
-        let spread = this._spread;
-        if ( !reportTableData.excelTmplInfo ) {
-            console.error( 'NOT DEFINED - reportTableData.excelTmplInfo', reportTableData.title );
-            return;
-        }
-
-        let sheet = spread.getSheetFromName(reportTableData.excelTmplInfo.sheetName);
-        if ( !sheet ) {
-            console.error( 'SheetName Not found !!!', reportTableData.excelTmplInfo.sheetName );
-            return;
-        }
-        console.log( 'SheetName - FOUND : ', reportTableData.excelTmplInfo.sheetName );
-
-        let dataset = reportTableData.res.result;
-        if ( !dataset ) {
-            console.error( 'SheetName - FOUND : ', reportTableData.title, 'RESULT IS NULL !!!' );
-            return;
-        }
-
-        let headerNames = reportTableData.excelTmplInfo.header;
-        let { startX, startY, baseWidth } = reportTableData.excelTmplInfo.position;
-
-        if ( (startY + dataset.length + 5) > sheet.getRowCount()) {
-            sheet.setRowCount(startY + dataset.length + 5);
-        }
-
-        for ( let y = 0; y < dataset.length - 1; y++ ) {
-            sheet.copyTo( startY, startX, startY+y+1, startX, 1, baseWidth, GC.Spread.Sheets.CopyToOptions.all );
-        }
-
         if ( dataset.length > 0 ) {
             let colNames = Object.getOwnPropertyNames(dataset[0]);
             if (colNames.length > 0 ) {
@@ -129,7 +71,6 @@ class ReportExcelPage extends Component {
         }
     }
 
-
     viewTemplateSetExcelData( reportData ) {
         let that = this;
         let tabNames = Object.getOwnPropertyNames( reportData );
@@ -139,10 +80,10 @@ class ReportExcelPage extends Component {
             let reportSheetData = reportData[tabName];
             if ( reportSheetData.constructor === Array ) { // isArray Check
                 reportSheetData.map( (reportTableData, index) => {
-                    that.sheetReportUpdate2('Sheet' + tabIndex + 'Table' + index, reportTableData);
+                    that.sheetReportUpdate('Sheet' + tabIndex + 'Table' + index, reportTableData);
                 });
             } else {
-                that.sheetReportUpdate2('Sheet' + tabIndex + 'Table1', reportSheetData);
+                that.sheetReportUpdate('Sheet' + tabIndex + 'Table1', reportSheetData);
             }
         });
         that._spread.resumeCalcService(true);
