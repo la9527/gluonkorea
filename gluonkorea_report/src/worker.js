@@ -189,6 +189,15 @@ alasql.fn.DAY = (dateStr) => {
     return rt;
 };
 
+alasql.fn.DAYNUM = (dateStr) => {
+    let rt = null;
+    if( dateStr === null ) return null;
+    try {
+        rt = (new Date(dateStr)).getDay();
+    } catch( e ) {}
+    return rt;
+};
+
 alasql.fn.customPercent = (type1, type2) => {
     try {
         if (type1 && type2) {
