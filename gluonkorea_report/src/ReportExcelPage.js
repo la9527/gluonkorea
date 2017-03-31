@@ -156,6 +156,10 @@ class ReportExcelPage extends Component {
 
     onTemplateLoadClick() {
         let that = this;
+
+        if ( window._loading ) {
+            window._loading.show();
+        }
         axios.get('xlsxTemplate/template_report.xlsx', {
             responseType: 'arraybuffer'
         })
@@ -170,6 +174,9 @@ class ReportExcelPage extends Component {
                     setTimeout( function() {
                         if ( that._reportData ) {
                             that.viewTemplateSetExcelData(that._reportData);
+                        }
+                        if ( window._loading ) {
+                            window._loading.close();
                         }
                     }, 1);
                 }, function( error ) {
@@ -234,14 +241,17 @@ class ReportExcelPage extends Component {
             'border': '1px solid gray'
         };
 
+        /*
+         <Button onClick={::this.onJsonLoadClick}>JSON Load</Button>
+         <Button onClick={::this.onJsonSaveClick}>JSON Save</Button>
+         */
+
         return (
             <div>
                 <ButtonToolbar>
-                    <Button onClick={::this.onJsonLoadClick}>JSON Load</Button>
-                    <Button onClick={::this.onJsonSaveClick}>JSON Save</Button>
-                    <Button onClick={::this.saveAsFile}>Excel 파일 저장</Button>
-                    <Button onClick={::this.onViewChange}>조회한 데이터만 처리</Button>
                     <Button onClick={::this.onTemplateLoadClick}>템플릿 형식</Button>
+                    <Button onClick={::this.onViewChange}>테이블 형식</Button>
+                    <Button onClick={::this.saveAsFile}>Excel 파일 저장</Button>
                 </ButtonToolbar>
                 <hr />
                 <div style={spreadStyle} ref="spread" />

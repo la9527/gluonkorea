@@ -23,9 +23,32 @@ export default class MultiFileLoad {
             });
     }
 
-    run() {
+    run( onResult ) {
         let that = this;
+
         let tableNames = Object.getOwnPropertyNames(this._option);
+        let tableCheck = tableNames.map( (el) => {
+            return {
+                tableName: el,
+                complete: false
+            };
+        });
+
+        this._workerImp.setLoadDoneMsg( function( msg ) {
+            console.log('this._workerImp.setLoadDoneMsg', msg.tableName);
+
+            tableCheck = tableCheck.map((el) => {
+                if (el.tableName === msg.tableName) {
+                    el.complete = true;
+                }
+                return el;
+            });
+
+            if ( tableCheck.filter(el => el.complete).length === tableCheck.length ) {
+                onResult && onResult();
+            }
+        });
+
         tableNames.map( (el) => {
             that.downloadFiles( el, this._option[el] );
         });

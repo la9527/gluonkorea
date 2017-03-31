@@ -3,6 +3,7 @@ export default class WorkerControl
 {
     constructor() {
         this.queryItem = [];
+        this.loadDoneFunc = [];
         this.init();
     }
     init() {
@@ -24,7 +25,11 @@ export default class WorkerControl
                         break;
                     case 'load_done':
                         console.log(result);
-                        that.loadDoneFunc && that.loadDoneFunc(result);
+                        that.loadDoneFunc.map( (func) => {
+                            if ( typeof( func ) === 'function' ) {
+                                func.call(that, result);
+                            }
+                        });
                         break;
                     case 'sql':
                         console.log(result);
@@ -40,7 +45,7 @@ export default class WorkerControl
         this.statusFunc = statusFunc;
     }
     setLoadDoneMsg( loadDoneFunc ) {
-        this.loadDoneFunc = loadDoneFunc;
+        this.loadDoneFunc.push(loadDoneFunc);
     }
     queryResponse( resMsg ) {
         let removeIdx = -1;

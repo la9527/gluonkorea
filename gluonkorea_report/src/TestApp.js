@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { ButtonToolbar, Button, PageHeader } from 'react-bootstrap';
-import axios from 'axios';
-import FileSaver from 'file-saver';
-import ReportExcelPage from './ReportExcelPage';
+import LoadingBox from './LoadingBox';
 
 class TestApp extends Component {
     constructor(props) {
@@ -11,14 +9,20 @@ class TestApp extends Component {
         this.state = {};
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        let that = this;
+        that.loader = new LoadingBox();
+        that.loader.show();
+        /*setTimeout( () => {
+            that.loader.close();
+        }, 3000);*/
+    }
 
     componentWillUnmount() {}
 
     render() {
-        let masterId = "test";
         return (
-            <ReportExcelPage masterId={masterId} />
+            <div ></div>
         );
     }
 }

@@ -8,6 +8,7 @@ import FileUploaderView from './FileUploaderView';
 import MasterIdSelectPage from './MasterIdSelectPage';
 import ReportViewPage from './ReportViewPage';
 import MultiFileLoad from './MultiFileLoad';
+import LoadingBox from './LoadingBox';
 import './App.css';
 import { Grid, Row, Col, Panel, PageHeader, ButtonToolbar, Button } from 'react-bootstrap';
 
@@ -102,6 +103,8 @@ class App extends Component {
         this.initEvent();
         let that = this;
 
+        window._loading = new LoadingBox();
+
         workerImp.setStatusMsg( function( msg ) {
             that.refs.statusBar.setState( { msg: msg } );
         });
@@ -109,7 +112,7 @@ class App extends Component {
             console.log( 'setLoadDoneMsg', msg.tableName );
 
             that.setState( {
-                ...this.state,
+                ...that.state,
                 showFileUpload: true
             });
 
@@ -193,7 +196,11 @@ class App extends Component {
 
     onMultiFileLoad1M() {
         let multiFileLoad = new MultiFileLoad( workerImp );
-        multiFileLoad.run();
+        let that = this;
+        window._loading.show();
+        multiFileLoad.run(function() {
+            window._loading.close();
+        });
     }
 
     onMultiFileLoad2M() {
@@ -202,8 +209,13 @@ class App extends Component {
             [tableNames.A_KEYWORD]: 'csvFiles/2_A_KEYWORD.csv',
             [tableNames.G_DAYS]: 'csvFiles/2_G_DAYS.csv',
             [tableNames.G_KEYWORD]: 'csvFiles/2_G_KEYWORD.csv'
-        } );
-        multiFileLoad.run();
+        });
+
+        let that = this;
+        window._loading.show();
+        multiFileLoad.run(function() {
+            window._loading.close();
+        });
     }
 
     onLoadedCSV( opt ) {
@@ -275,15 +287,14 @@ class App extends Component {
 
         return (
             <Grid fluid={true}>
-                <Row className="show-grid">
-                  <PageHeader className="text-center">Test CSV</PageHeader>
-                </Row>
                 <Row>
                     <Col xs={3}>
+                        <PageHeader className="text-center">REPORT</PageHeader>
                         <ButtonToolbar>
                             <Button bsSize="sm" onClick={::this.onMultiFileLoad1M}>Report 파일 적용(1M)</Button>
                             <Button bsSize="sm" onClick={::this.onMultiFileLoad2M}>Report 파일 적용(2M)</Button>
                         </ButtonToolbar>
+                        <hr />
                         {uploadView()}
                         <hr />
                         <ButtonToolbar>
@@ -294,6 +305,7 @@ class App extends Component {
                         {showTables()}
                     </Col>
                     <Col xs={9}>
+                        <hr />
                         {pageControl()}
                     </Col>
                 </Row>

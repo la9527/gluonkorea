@@ -24,6 +24,9 @@ export default class ReportViewPage extends Component {
             },
             done: function( masterId, data ) {
                 that.reportQuery = data;
+                if ( window._loading ) {
+                    window._loading.close();
+                }
                 that.setState( {
                     ...this.state,
                     masterId: masterId,
@@ -33,11 +36,17 @@ export default class ReportViewPage extends Component {
             workerImp: this.props.workerImp
         });
 
+        if ( window._loading ) {
+            window._loading.show();
+        }
         this._reportSqlExec.run(this.props.masterId);
     }
 
     componentWillUpdate(nextProps) {
         if ( nextProps.masterId !== this.state.masterId ) {
+            if ( window._loading ) {
+                window._loading.show();
+            }
             this._reportSqlExec.run( this.props.masterId );
         }
     }

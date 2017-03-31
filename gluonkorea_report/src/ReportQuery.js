@@ -219,7 +219,7 @@ let QUERYS = {
         "SELECT C.dy as [요일], C.t1 as [노출수], C.t2 as [클릭수], C.t3 as [총비용], C.t4 as [전환수량], C.t5 as [전환금액] \
         FROM  \
         (  \
-            SELECT C.dy, C.dn, GROUPSUM(C.t1) as t1, GROUPSUM(C.t2) as t2, GROUPSUM(C.t3) as t3, GROUPSUM(C.t4) as t4, GROUPSUM(C.t5) ast5  \
+            SELECT C.dy, C.dn, GROUPSUM(C.t1) as t1, GROUPSUM(C.t2) as t2, GROUPSUM(C.t3) as t3, GROUPSUM(C.t4) as t4, GROUPSUM(C.t5) as t5  \
             FROM  \
             (  \
                 SELECT DAY(A.DT) as dy, DAYNUM(A.DT) as dn, (A.t1 + B.t1) as t1, (A.t2 + B.t2) as t2, (A.t3 + B.t3) as t3, (A.t4 + B.t4)as t4, (A.t5 + B.t5) as t5  \
@@ -305,7 +305,10 @@ let QUERYS = {
         ( \
             SELECT GROUPSUM([노출수]) as t1, GROUPSUM([클릭수]) as t2, GROUPSUM([총비용]) as t3, GROUPSUM([전환수량]) as t4, GROUPSUM([전환금액]) as t5 FROM [$table_keyword] \
             WHERE [마스터ID] = '$masterId' \
-        ) A"
+        ) A",
+    "RUNNINGTIME": "SELECT GROUPDATEMIN(DT) + ' ~ ' + GROUPDATEMAX(DT) as [RunningTime] FROM DAYS",
+    "MASTERID": "SELECT '$masterId' as MASTERID",
+    "REPORTMONTH": "SELECT INTEGER(SUBSTR(GROUPDATEMIN(DT), 6, 2)) + '월' FROM DAYS"
 };
 
 export let tableNames = {
@@ -379,9 +382,53 @@ let QueryList = (tableNameObj) => {
                     position: {
                         startX: 1,
                         startY: 27,
-                        baseWidth: 14
+                        baseWidth: 15
                     },
                     fixHeight: 31
+                }
+            },
+            {
+                title: 'Running Time',
+                query: QUERYS.RUNNINGTIME,
+                params : {},
+                excelTmplInfo: {
+                    sheetName: '종합요약',
+                    position: {
+                        startX: 9,
+                        startY: 5,
+                        baseWidth: 1
+                    },
+                    fixHeight: 1
+                }
+            },
+            {
+                title: 'ID',
+                query: QUERYS.MASTERID,
+                params : {
+                    masterId: ''
+                },
+                excelTmplInfo: {
+                    sheetName: '종합요약',
+                    position: {
+                        startX: 3,
+                        startY: 5,
+                        baseWidth: 1
+                    },
+                    fixHeight: 1
+                }
+            },
+            {
+                title: '리포트 기간',
+                query: QUERYS.REPORTMONTH,
+                params: {},
+                excelTmplInfo: {
+                    sheetName: '종합요약',
+                    position: {
+                        startX: 3,
+                        startY: 21,
+                        baseWidth: 1
+                    },
+                    fixHeight: 1
                 }
             }
         ],
@@ -427,7 +474,7 @@ let QueryList = (tableNameObj) => {
                     position: {
                         startX: 1,
                         startY: 27,
-                        baseWidth: 14
+                        baseWidth: 15
                     },
                     fixHeight: 31
                 },
@@ -515,7 +562,7 @@ let QueryList = (tableNameObj) => {
                     position: {
                         startX: 1,
                         startY: 27,
-                        baseWidth: 14
+                        baseWidth: 15
                     },
                     header: ['주차','일자','노출','클릭','총비용','전환수','전환매출'],
                     fixHeight: 31
