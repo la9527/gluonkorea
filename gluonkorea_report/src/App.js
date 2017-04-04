@@ -167,21 +167,29 @@ class App extends Component {
     }
 
     onQueryView() {
-        this.setState( {
-            ...this.state,
-            viewpage: {
-                name: PAGE_TYPE.QUERY
-            }
-        });
+        if ( !this.refs.queryPage ) {
+            this.setState({
+                ...this.state,
+                viewpage: {
+                    name: PAGE_TYPE.QUERY
+                }
+            });
+        } else {
+            this.refs.queryPage.forceUpdate();
+        }
     }
 
     onMasterIdSelectView() {
-        this.setState( {
-            ...this.state,
-            viewpage: {
-                name: PAGE_TYPE.MASTERID_SELECT
-            }
-        });
+        if ( !this.refs.masterIdPage ) {
+            this.setState({
+                ...this.state,
+                viewpage: {
+                    name: PAGE_TYPE.MASTERID_SELECT
+                }
+            });
+        } else {
+            this.refs.masterIdPage.onRunSql();
+        }
     }
 
     onMasterIdClick(masterId) {
@@ -223,10 +231,6 @@ class App extends Component {
         workerImp.postMessage( { type: 'loaddata', data: opt.data, name: opt.name } );
     }
 
-    onLoadedExcel( opt ) {
-        console.log( 'onLoadedExcel', opt.name );
-    }
-
     render() {
         let that = this;
 
@@ -237,8 +241,6 @@ class App extends Component {
                         <FileUploaderView name={tableNames.G_KEYWORD} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
                         <FileUploaderView name={tableNames.A_DAYS} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
                         <FileUploaderView name={tableNames.A_KEYWORD} buttonTitle="CSV 업로드" accept=".csv" onLoaded={::that.onLoadedCSV} />
-                        <br />
-                        <FileUploaderView name="Template" buttonTitle="템플릿 업로드" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onLoaded={::that.onLoadedExcel} />
                     </Panel>
                 );
         };
@@ -251,7 +253,7 @@ class App extends Component {
             if ( that.state.viewpage.name === PAGE_TYPE.MASTERID_SELECT ) {
                 console.log( 'pageControl :: REPORT' );
                 component = (
-                    <MasterIdSelectPage workerImp={workerImp} keywordTableName={tableNames.A_DAYS} onMasterIdClick={::this.onMasterIdClick} />
+                    <MasterIdSelectPage ref="masterIdPage" workerImp={workerImp} keywordTableName={tableNames.A_DAYS} onMasterIdClick={::this.onMasterIdClick} />
                 );
             } else if ( that.state.viewpage.name === PAGE_TYPE.TABLE && that.state.viewpage.tableName ) {
                 console.log( 'pageControl :: TABLEVIEW' );
@@ -261,12 +263,12 @@ class App extends Component {
             } else if ( that.state.viewpage.name === PAGE_TYPE.REPORT ) {
                 console.log('pageControl :: REPORT');
                 component = (
-                    <ReportViewPage workerImp={workerImp} masterId={that.state.viewpage.masterId} />
+                    <ReportViewPage ref="reportPage" workerImp={workerImp} masterId={that.state.viewpage.masterId} />
                 );
             } else {
                 console.log( 'pageControl :: QueryViewPage' );
                 component = (
-                    <QueryViewPage workerImp={workerImp} />
+                    <QueryViewPage ref="queryPage" workerImp={workerImp} />
                 );
             }
             return component;
@@ -290,14 +292,14 @@ class App extends Component {
                 <Row>
                     <Col xs={3}>
                         <PageHeader className="text-center">REPORT</PageHeader>
-                        <ButtonToolbar>
-                            <Button bsSize="sm" onClick={::this.onMultiFileLoad1M}>Report 파일 적용(1M)</Button>
-                            <Button bsSize="sm" onClick={::this.onMultiFileLoad2M}>Report 파일 적용(2M)</Button>
+                        <ButtonToolbar className="text-center">
+                            <Button bsSize="sm" onClick={::this.onMultiFileLoad1M}>ROAS DATA - (1월)</Button>
+                            <Button bsSize="sm" onClick={::this.onMultiFileLoad2M}>ROAS DATA - (2월)</Button>
                         </ButtonToolbar>
                         <hr />
                         {uploadView()}
                         <hr />
-                        <ButtonToolbar>
+                        <ButtonToolbar className="text-center">
                             <Button bsSize="sm" onClick={::this.onQueryView}>Query 실행</Button>
                             <Button bsSize="sm" onClick={::this.onMasterIdSelectView}>Report 처리</Button>
                         </ButtonToolbar>

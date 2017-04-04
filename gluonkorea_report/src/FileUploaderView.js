@@ -52,6 +52,7 @@ export default class FileUploaderView extends Component {
             });
         }
 
+        this.refs.xlsInput.value = "";
         this.fileLoaderRun();
     }
 
@@ -113,10 +114,10 @@ export default class FileUploaderView extends Component {
             if ( that.state.statusText === LOAD_TYPE.LOADING && that.state.progress ) {
                 return (
                     <Row>
-                        <Col md={5}>
+                        <Col md={6}>
                             <small>{this.props.name}</small>
                         </Col>
-                        <Col md={7}>
+                        <Col md={6}>
                             <ProgressBar active now={that.state.progress.now} max={that.state.progress.max} />
                         </Col>
                     </Row>
@@ -125,17 +126,14 @@ export default class FileUploaderView extends Component {
             let uploadFileId = 'uploadFile_' + Date.now() + '_' + Math.floor((Math.random() * 100) + 1);
             return (
                 <Row>
-                    <Col md={5}>
-                        <small>{this.props.name}</small>
+                    <Col md={6}>
+                        <div style={{'fontSize':'10pt'}}>{this.props.name}</div>
                     </Col>
-                    <Col md={5}>
+                    <Col md={6}>
                         <div className="filebox">
-                            <label htmlFor={uploadFileId}>{this.props.buttonTitle}</label>
+                            <label htmlFor={uploadFileId}>{this.props.buttonTitle} {this.state.statusText ? ' - ' + (this.state.statusText) : null}</label>
                             <input ref="xlsInput" className="col-xs-12" id={uploadFileId} type="file" accept={this.props.accept} onChange={::this.fileLoader} />
                         </div>
-                    </Col>
-                    <Col md={2}>
-                        <small>{this.state.statusText}</small>
                     </Col>
                 </Row>
             );

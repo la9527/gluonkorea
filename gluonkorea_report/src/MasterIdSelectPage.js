@@ -47,10 +47,15 @@ export default class MasterIdSelectPage extends Component {
 
     componentDidMount() {
         this.onRunSql();
+        window.addEventListener('resize', ::this.onUpdateResize);
     }
 
     componentWillUnmount() {
+        window.removeEventListener('resize', ::this.onUpdateResize);
+    }
 
+    onUpdateResize() {
+        this.forceUpdate();
     }
 
     onMasterIdClick(masterId) {
@@ -72,21 +77,26 @@ export default class MasterIdSelectPage extends Component {
             );
         };
 
-        let count = '';
+        let count = 'Master ID 리스트 - ';
         if ( this.state.sql && this.state.sql.table && this.state.sql.table.length ) {
-            count = this.state.sql.table.length + '건';
+            count += this.state.sql.table.length + '건';
         }
+
+        let tabHeight = window.outerHeight - 350;
+        let tabbodyStyle = {
+            'height': tabHeight + 'px',
+            'overflowY': 'scroll'
+        };
 
         return (
             <Form>
-                <FormGroup controlId="masterIdInput" className="">
+                <FormGroup controlId="masterIdInput" style={{margin:'0'}}>
                     <FormControl inputRef={ref => { this.inputText = ref; }} type="text" placeholder="검색 필터" onKeyUp={::this.onRunSql} />
                 </FormGroup>
                 <br />
-                <Panel header="Master ID 리스트">
+                <Panel header={count}>
                     {msgBox()}
-                    {count && (<div className="text-right">{count}</div>)}
-                    <TableView tableData={this.state.sql.table} onCellClick={::this.onMasterIdClick}/>
+                    <TableView style={tabbodyStyle} tableData={this.state.sql.table} onCellClick={::this.onMasterIdClick}/>
                 </Panel>
             </Form>
         );

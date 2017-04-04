@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ButtonToolbar, Button, PageHeader } from 'react-bootstrap';
 import axios from 'axios';
 import FileSaver from 'file-saver';
+import $ from 'jquery';
 
 let GC = window.GC;
 
@@ -188,6 +189,40 @@ class ReportExcelPage extends Component {
             });
     }
 
+    onLoadedTemplateExcel(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        let files = e.dataTransfer && e.dataTransfer.files;
+        if ( !files ) {
+            files = e.target.files;
+        }
+
+        if ( !files || files.length !== 1 ) {
+            alert( '파일이 선택되지 않았거나 여러개 선택 되었습니다.' );
+            return;
+        }
+
+        let that = this;
+        that._excelIo.open(files[0], function(json) {
+            console.log( 'LOAD COMPLETE !!!' );
+            that._spread.suspendPaint();
+            that._spread.fromJSON( json );
+            that._spread.resumePaint();
+
+            setTimeout( function() {
+                if ( that._reportData ) {
+                    that.viewTemplateSetExcelData(that._reportData);
+                }
+                if ( window._loading ) {
+                    window._loading.close();
+                }
+            }, 1);
+        }, function( error ) {
+            alert(error.errorMessage);
+        });
+    }
+
     onJsonLoadClick() {
         let that = this;
         axios.get('xlsxTemplate/09gage.json')
@@ -233,25 +268,36 @@ class ReportExcelPage extends Component {
         window.removeEventListener('resize', ::this.onUpdateResize);
     }
 
+    onTemplateFileClick() {
+        if ( this.refs.templateFile ) {
+            $(this.refs.templateFile).trigger('click');
+        }
+    }
+
     render() {
-        let tabHeight = window.outerHeight - 340;
+        let tabHeight = window.outerHeight - 270;
         let spreadStyle = {
             'width': '100%',
             'height': tabHeight + 'px',
             'border': '1px solid gray'
         };
 
-        /*
-         <Button onClick={::this.onJsonLoadClick}>JSON Load</Button>
-         <Button onClick={::this.onJsonSaveClick}>JSON Save</Button>
-         */
+        let styleHiddenFile = {
+            visibility: 'hidden',
+            display: 'inline',
+            width: '5px'
+        };
 
         return (
             <div>
                 <ButtonToolbar>
-                    <Button onClick={::this.onTemplateLoadClick}>템플릿 형식</Button>
-                    <Button onClick={::this.onViewChange}>테이블 형식</Button>
                     <Button onClick={::this.saveAsFile}>Excel 파일 저장</Button>
+                    <div className="text-right" style={{display:'inline', right: '0', position: 'absolute'}}>
+                        <Button onClick={::this.onTemplateLoadClick}>템플릿 형식</Button>
+                        <Button onClick={::this.onViewChange}>테이블 형식</Button>
+                        <Button onClick={::this.onTemplateFileClick}>Excel 템플릿 파일 설정</Button>
+                        <input ref="templateFile" style={styleHiddenFile} className="hiddenFile" type="file" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={::this.onLoadedTemplateExcel} />
+                    </div>
                 </ButtonToolbar>
                 <hr />
                 <div style={spreadStyle} ref="spread" />

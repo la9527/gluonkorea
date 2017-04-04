@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ButtonToolbar, Button, PageHeader } from 'react-bootstrap';
-import LoadingBox from './LoadingBox';
+import ReportExcelPage from "./ReportExcelPage";
+//import LoadingBox from './LoadingBox';
 
 class TestApp extends Component {
     constructor(props) {
@@ -10,19 +11,14 @@ class TestApp extends Component {
     }
 
     componentDidMount() {
-        let that = this;
-        that.loader = new LoadingBox();
-        that.loader.show();
-        /*setTimeout( () => {
-            that.loader.close();
-        }, 3000);*/
+
     }
 
     componentWillUnmount() {}
 
     render() {
         return (
-            <div ></div>
+            <ReportExcelPage />
         );
     }
 }

@@ -41,7 +41,7 @@ export default class QueryViewPage extends Component {
     }
 
     onUpdateResize() {
-        this.setState( ...this.state );
+        this.forceUpdate();
     }
 
     componentDidMount() {
@@ -65,7 +65,7 @@ export default class QueryViewPage extends Component {
             );
         };
 
-        let tabHeight = window.outerHeight - 400;
+        let tabHeight = window.outerHeight - 250;
         let tabbodyStyle = {
             'height': tabHeight + 'px',
             'overflowY': 'scroll'
@@ -73,7 +73,7 @@ export default class QueryViewPage extends Component {
         return (
             <Grid fluid={true}>
                 <Row>
-                    <Col xs={6}>
+                    <Col xs={6} style={{padding: '0'}}>
                         <FormGroup controlId="sqlTextArea" >
                             <FormControl componentClass="textarea" placeholder="SQL 명령어를 입력하세요." />
                         </FormGroup>
