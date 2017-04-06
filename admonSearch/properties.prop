@@ -1,0 +1,9 @@
+# ID, PASS
+#admon.id=
+#admon.pass=
+
+# 한번에 전송할 검색 건수
+send.splitcount=20
+
+# 전송 간격 - 랜덤한 시간의 최대 값
+send.interval=1000

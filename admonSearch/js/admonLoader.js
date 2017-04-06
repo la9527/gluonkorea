@@ -2,12 +2,23 @@
 var request = require('request');
 var fs = require('fs');
 var csv = require('csvtojson');
+var PropertiesReader = require('properties-reader');
+var properties = PropertiesReader('properties.prop');
 
-let ID = 'hlmaster';
-let PASS = 'pih2001##';
+var ID = properties.get('admon.id');
+var PASS = properties.get('admon.pass');
 
-let j = request.jar();
-let baseReq = request.defaults({
+if ( !ID || !PASS ) {
+    console.log( 'Undefine admon.id or admon.pass in properties.prop file.' );
+    process.exit(0);
+    return;
+}
+
+var SPLIT_COUNT = parseInt(properties.get('send.splitcount') || '20', 10);
+var SEND_INTERVAL = parseInt(properties.get('send.interval') || '1000', 10);
+
+var j = request.jar();
+var baseReq = request.defaults({
     jar: j,
     timeout: 10000,
     headers: {
@@ -18,7 +29,7 @@ let baseReq = request.defaults({
     }
 });
 
-let admonSellerLogin = function(id, pass, resultFunc) {
+var admonSellerLogin = function(id, pass, resultFunc) {
     baseReq({
         url: 'http://nvista.admonseller.com/common/login/doLogin',
         method: 'POST',
@@ -27,7 +38,7 @@ let admonSellerLogin = function(id, pass, resultFunc) {
             password: pass
         }
     }, function (error, response, body) {
-        let headers = response.headers;
+        var headers = response.headers;
         console.log('HEADER', JSON.stringify(response.headers, null, '  '));
         console.log(body);
 
@@ -40,7 +51,7 @@ let admonSellerLogin = function(id, pass, resultFunc) {
     });
 };
 
-let salesMngGetList = function(searchText, resultFunc ) {
+var salesMngGetList = function(searchText, resultFunc ) {
     baseReq({
         url: 'http://nvista.admonseller.com/salesMng/salesMng06/list',
         method: 'POST',
@@ -60,9 +71,6 @@ let salesMngGetList = function(searchText, resultFunc ) {
     });
 };
 
-let SPLITNUM = 20;
-let SEND_INTERVAL = 1000;
-
 function main() {
     var args = process.argv.slice(2);
     if (args.length === 0) {
@@ -72,15 +80,15 @@ function main() {
         return;
     }
 
-    let dataList = [];
-    let startPos = 0;
-    let outputJsonData = [];
-    let saveFileName = args.length >= 2 ? args[1] : 'researchData.json';
+    var dataList = [];
+    var startPos = 0;
+    var outputJsonData = [];
+    var saveFileName = args.length >= 2 ? args[1] : 'researchData.json';
 
-    let recursiveRecall = function() {
-        let callItem = dataList.splice( startPos, SPLITNUM );
+    var recursiveRecall = function() {
+        var callItem = dataList.splice( startPos, SPLIT_COUNT );
         if ( callItem.length > 0 ) {
-            let searchText = callItem.join(',');
+            var searchText = callItem.join(',');
             console.log( 'Search Data Start - ' + callItem.length + ' : remain count - ' + dataList.length );
             salesMngGetList(searchText, function( result, data ) {
                 if ( result ) {
@@ -88,9 +96,13 @@ function main() {
                     outputJsonData = outputJsonData.concat( data );
                 }
                 if ( dataList.length > 0 ) {
-                    setTimeout( function() {
+                    if ( SEND_INTERVAL > 0 ) {
+                        setTimeout(function () {
+                            recursiveRecall();
+                        }, Math.floor(Math.random() * SEND_INTERVAL) + 1);
+                    } else {
                         recursiveRecall();
-                    }, Math.floor(Math.random() * 1000) + 1 );
+                    }
                 } else {
                     console.log( 'Search Complete. - Save to ' + saveFileName + '.');
                     fs.writeFile(saveFileName, JSON.stringify(outputJsonData, '  ', 2), 'utf8', function() {
