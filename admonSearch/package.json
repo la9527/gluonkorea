@@ -1,0 +1,13 @@
+{
+  "name": "admonSearch",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "csvtojson": "^1.1.4",
+    "fs": "0.0.1-security",
+    "request": "^2.81.0"
+  },
+  "scripts": {
+    "test": "node js/admonLoader.js"
+  }
+}
