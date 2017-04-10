@@ -58,6 +58,10 @@ module.exports = {
       ],
       worker: [
           paths.appWorkerJs
+      ],
+      adSearch: [
+          require.resolve('./polyfills'),
+          paths.appAdSearchIndexJs
       ]
   },
   output: {
@@ -198,6 +202,7 @@ module.exports = {
       inject: true,
       chunks: [ 'main' ],
       template: paths.appHtml,
+      filename: 'index.html',
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -210,6 +215,24 @@ module.exports = {
         minifyCSS: true,
         minifyURLs: true
       }
+    }),
+    new HtmlWebpackPlugin({
+        inject: false,
+        chunks: [ 'adSearch' ],
+        template: paths.appAdSearchHtml,
+        filename: 'adSearch.html',
+        minify: {
+            removeComments: true,
+            collapseWhitespace: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true,
+            removeEmptyAttributes: true,
+            removeStyleLinkTypeAttributes: true,
+            keepClosingSlash: true,
+            minifyJS: true,
+            minifyCSS: true,
+            minifyURLs: true
+        }
     }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.

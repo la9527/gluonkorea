@@ -35,6 +35,11 @@ module.exports = {
       ],
       worker: [
           paths.appWorkerJs
+      ],
+      adSearch: [
+          require.resolve('react-dev-utils/webpackHotDevClient'),
+          require.resolve('./polyfills'),
+          paths.appAdSearchIndexJs
       ]
   },
   output: {
@@ -165,7 +170,14 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: false,
       chunks: [ 'main' ],
-      template: paths.appHtml
+      template: paths.appHtml,
+      filename: 'index.html'
+    }),
+    new HtmlWebpackPlugin({
+        inject: false,
+        chunks: [ 'adSearch' ],
+        template: paths.appAdSearchHtml,
+        filename: 'adSearch.html'
     }),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
