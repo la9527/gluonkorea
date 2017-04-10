@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import './App.css';
-import ExcelViewPage from "./ExcelViewPage";
+import AdSearchPage from "./AdSearchPage";
 
 class App extends Component {
   render() {
     return (
-      <ExcelViewPage ref="excel" />
+      <AdSearchPage ref="excel" />
     );
   }
 }

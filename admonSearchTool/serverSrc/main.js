@@ -116,7 +116,7 @@ class AdTmonSellerCrawler {
     }
 }
 
-let whitelist = ['http://localhost', 'http://localhost:3000', 'http://localhost:5000', 'http://cafe24.com']
+let whitelist = ['http://localhost', 'http://localhost:3000', 'http://localhost:5000', 'http://gluonkorea.cafe24.com', 'http://gluonkorea.cafe24.com:5000']
 let corsOptions = {
     origin: function (origin, callback) {
         if (whitelist.indexOf(origin) !== -1) {
