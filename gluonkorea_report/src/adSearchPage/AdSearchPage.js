@@ -6,7 +6,7 @@ import $ from 'jquery';
 
 let GC = window.GC;
 
-let SEND_INTERVAL = 2000;
+let SEND_INTERVAL = 1000;
 
 class MessageView extends Component {
     constructor() {
@@ -43,18 +43,29 @@ class AdSearchPage extends Component {
 
         let resultData = [];
         let selectedRanges = spread.getActiveSheet().getSelections();
+        let confirmYn = true;
         if ( selectedRanges.length > 0 ) {
             let col = selectedRanges[0].col;
             for (let i = 0; i < sheet.getRowCount(); i++) {
                 let item = sheet.getValue(i, col);
-                if ( item && item.length >= 10 ) {
-                    resultData.push( { key: item, col: col, row : i, run: false, data: null } );
+                if ( item && ('' + item).length >= 10 ) {
+                    resultData.push( { key: ('' + item), col: col, row : i, run: false, data: null } );
                 } else {
-                    alert('사업자 번호가 있는 컬럼을 선택해 주세요.');
-                    return [];
+                    if ( !confirmYn ) {
+                        sheet.setActiveCell(i, col);
+                        sheet.showRow(i, GC.Spread.Sheets.VerticalPosition.bottom);
+                        if ( !window.confirm("해당 데이터가 이상합니다. 무시하고 진행할까요?") ) {
+                            return [];
+                        }
+                        confirmYn = false;
+                    }
                 }
             }
             this.refs.msgView.updateMsg( 'GET DATA : ' + resultData.length );
+
+            if ( resultData.length === 0 ) {
+                alert('데이터를 찾을 수 없습니다. 사업자 번호가 있는 컬럼을 선택해 주세요.');
+            }
         } else {
             alert('사업자 번호가 있는 컬럼을 선택해 주세요.');
             return [];
@@ -66,7 +77,7 @@ class AdSearchPage extends Component {
         let spread = this._spread;
         let sheet = spread.getActiveSheet();
 
-        let baseCol = original_data[0].col + 4;
+        let baseCol = original_data[0].col + 6;
         if ( sheet.getColumnCount() < baseCol ) {
             sheet.setColumnCount(baseCol);
         }
@@ -83,10 +94,12 @@ class AdSearchPage extends Component {
 
         spread.suspendPaint();
         let maxRow = -1;
+        let viewCol = -1;
         for ( let i = 0; i < original_data.length; i++ ) {
             let item = findItem( original_data[i].key );
             if ( item !== null ) {
                 let { row, col } = original_data[i];
+                viewCol = col;
                 if ( !item.advId ) {
                     sheet.setValue(row, col + 1, 'N');
                 } else {
@@ -94,11 +107,13 @@ class AdSearchPage extends Component {
                     sheet.setValue(row, col + 2, item.advId);
                     sheet.setValue(row, col + 3, item.advCom.repName);
                     sheet.setValue(row, col + 4, item.advCom.comName);
+                    sheet.setValue(row, col + 5, item.joinTime);
                 }
                 maxRow = row;
             }
         }
-        if ( maxRow > -1 ) {
+        if ( maxRow > -1 && viewCol > -1 ) {
+            sheet.setActiveCell(maxRow, viewCol);
             sheet.showRow(maxRow, GC.Spread.Sheets.VerticalPosition.bottom);
         }
         spread.resumePaint();
@@ -109,7 +124,7 @@ class AdSearchPage extends Component {
         let searchData = this.getAdSearchData();
         let dataList = null;
 
-        if ( searchData.length == 0 ) {
+        if ( searchData.length === 0 ) {
             return;
         }
 
@@ -120,8 +135,8 @@ class AdSearchPage extends Component {
             return !isNaN(parseInt( el, 10 ));
         });
 
-        let ID = window.adSearchId.value; // 'hlmaster',
-        let PASS = window.adSearchPass.value; // 'pih2001##'
+        let ID = window.adSearchId.value;
+        let PASS = window.adSearchPass.value;
 
         if ( !ID || !PASS ) {
             alert( '아이디 혹은 패스워드가 입력되지 않았습니다.' );
@@ -129,7 +144,7 @@ class AdSearchPage extends Component {
         }
 
         let recursiveCall = () => {
-            let callItem = dataList.splice( 0, 20 );
+            let callItem = dataList.splice( 0, 100 );
 
             let url = 'http://' + location.hostname + ':3030/admonSearch';
             axios.post( url, {
@@ -207,6 +222,10 @@ class AdSearchPage extends Component {
             that._spread.suspendPaint();
             that._spread.fromJSON( json );
             that._spread.resumePaint();
+
+            if ( that.refs.fileOpen) {
+                that.refs.fileOpen.value = '';
+            }
         }, function( error ) {
             alert(error.errorMessage);
         });
