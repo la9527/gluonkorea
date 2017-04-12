@@ -101,9 +101,13 @@ class AdSearchPage extends Component {
                 let { row, col } = original_data[i];
                 viewCol = col;
                 if ( !item.advId ) {
-                    sheet.setValue(row, col + 1, 'N');
+                    sheet.setValue(row, col + 1, '-');
                 } else {
-                    sheet.setValue(row, col + 1, 'Y');
+                    if ( item.srStatus && item.srStatus === 'OLS' ) {
+                        sheet.setValue(row, col + 1, 'N');
+                    } else {
+                        sheet.setValue(row, col + 1, 'Y');
+                    }
                     sheet.setValue(row, col + 2, item.advId);
                     sheet.setValue(row, col + 3, item.advCom.repName);
                     sheet.setValue(row, col + 4, item.advCom.comName);

@@ -1,9 +1,9 @@
-import request from 'request';
+let request = require( 'request' );
 
 let SPLIT_COUNT = 50;
 let SEND_INTERVAL = 1000;
 
-export default class AdTmonSellerCrawler {
+class AdTmonSellerCrawler {
     constructor() {
         this._baseReq = request.defaults({
             jar: request.jar(),
@@ -108,3 +108,5 @@ export default class AdTmonSellerCrawler {
         recursiveRecall();
     }
 }
+
+module.exports = AdTmonSellerCrawler;
