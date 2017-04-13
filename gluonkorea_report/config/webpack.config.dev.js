@@ -33,9 +33,11 @@ module.exports = {
           require.resolve('./polyfills'),
           paths.appIndexJs
       ],
+      /*
       worker: [
           paths.appWorkerJs
       ],
+      */
       adSearch: [
           require.resolve('react-dev-utils/webpackHotDevClient'),
           require.resolve('./polyfills'),

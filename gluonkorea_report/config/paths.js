@@ -68,7 +68,7 @@ module.exports = {
   appHtml: resolveApp('public/index.html'),
   appAdSearchHtml: resolveApp('public/adSearch.html'),
   appIndexJs: resolveApp('src/index.js'),
-  appWorkerJs: resolveApp('src/worker.js'),
+  //appWorkerJs: resolveApp('src/worker.js'),
   appAdSearchIndexJs: resolveApp('src/adSearchPage/index.js'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
