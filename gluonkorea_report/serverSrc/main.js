@@ -92,6 +92,11 @@ router.post('/admonSearch', (req, res) => {
 
 let requestUrlsInfo = [
     {
+        url: '/report/getProduct',
+        funcName: 'getProduct',
+        param: [ { name: 'month', must: true, desc: '월' }, 'site', 'masterId' ]
+    },
+    {
         url: '/report/getKeyword',
         funcName: 'getKeyword',
         param: [ { name: 'month', must: true, desc: '월' }, 'site', 'masterId' ]
@@ -110,6 +115,21 @@ let requestUrlsInfo = [
         url: '/report/dayOfWeekReport',
         funcName: 'dayOfWeekReport',
         param: [ { name: 'month', must: true, desc: '월' }, 'site', 'masterId' ]
+    },
+    {
+        url: '/report/searchMasterId',
+        funcName: 'searchMasterId',
+        param: [ { name: 'month', must: true, desc: '월' } ]
+    },
+    {
+        url: '/report/searchDateTerm',
+        funcName: 'searchDateTerm',
+        param: [ { name: 'month', must: true, desc: '월' } ]
+    },
+    {
+        url: '/report/searchPossibleMonth',
+        funcName: 'searchPossibleMonth',
+        param: []
     }
 ];
 

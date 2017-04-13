@@ -59,7 +59,7 @@ class ReportQuery {
         return result;
     }
 
-    getKeyword( month, site, masterId ) {
+    getProduct( month, site, masterId ) {
         let sqlMasterId = masterId ? `AND masterId = '${masterId}'` : '';
         let sqlSite = site ? `AND site = '${site}'` : '';
         let that = this;
@@ -80,14 +80,35 @@ class ReportQuery {
         return that.syncQuery( sql );
     }
 
+    getKeyword( month, site, masterId ) {
+        let sqlMasterId = masterId ? `AND masterId = '${masterId}'` : '';
+        let sqlSite = site ? `AND site = '${site}'` : '';
+        let that = this;
+        let sql = `SELECT
+                    groupName as '그룹명',
+                    productId as '상품번호',
+                    viewArea as '노출영역',
+                    keyword as '키워드',
+                    viewCount as '노출수',
+                    clickCount as '클릭수',
+                    totalCost as '총비용',
+                    changeOverCount as '전환수량',
+                    changeOverCost as '전환금액'
+                FROM report.AD_KEYWORD_REPORT
+                WHERE
+                    reportMonth = '${month}' ${sqlSite} ${sqlMasterId}`;
+        console.log( sql );
+        return that.syncQuery( sql );
+    }
+
     monthReport( month, site, masterId ) {
         let sqlMasterId = masterId ? `AND masterId = '${masterId}'` : '';
         let sqlSite = site ? `AND site = '${site}'` : '';
 
         let sql = `SELECT
+                        B.dayofweek AS '주차',
                         DATE_FORMAT(B.reportDate, '%Y-%m-%d') AS '날짜',
                         B.week AS '요일',
-                        B.dayofweek AS 'DayOfWeek',
                         (CASE WHEN A.viewCount IS NOT NULL THEN A.viewCount ELSE 0 END) as '노출수',
                         (CASE WHEN A.clickCount IS NOT NULL THEN A.clickCount ELSE 0 END) as '클릭수',
                         (CASE WHEN A.totalCost IS NOT NULL THEN A.totalCost ELSE 0 END) as '총비용',
@@ -186,7 +207,9 @@ class ReportQuery {
         let sqlSite = site ? `AND site = '${site}'` : '';
 
         let sql = `SELECT
-                        CONCAT(B.dayofweek, '주') AS 'DayOfWeek',
+                        CONCAT(B.dayofweek, '주') AS '주차',
+                        CONCAT(DATE_FORMAT(B.minDate, '%Y-%m-%d'), ' ~ ') as '시작일자',
+                        DATE_FORMAT(B.maxDate, '%Y-%m-%d') as '마지막일자',
                         (CASE WHEN A.viewCount IS NOT NULL THEN A.viewCount ELSE 0 END) as '노출수',
                         (CASE WHEN A.clickCount IS NOT NULL THEN A.clickCount ELSE 0 END) as '클릭수',
                         (CASE WHEN A.totalCost IS NOT NULL THEN A.totalCost ELSE 0 END) as '총비용',
@@ -207,7 +230,10 @@ class ReportQuery {
                         GROUP BY dayofweek
                     ) A
                     RIGHT JOIN (
-                            SELECT WEEK(reportDate,0) - WEEK(DATE_SUB(reportDate, INTERVAL DAYOFMONTH(reportDate)-1 DAY),0)+1 AS dayofweek
+                            SELECT 
+                                WEEK(reportDate,0) - WEEK(DATE_SUB(reportDate, INTERVAL DAYOFMONTH(reportDate)-1 DAY),0)+1 AS dayofweek,
+                                MIN(reportDate) as minDate,
+	                            MAX(reportDate) as maxDate
                             FROM report.AD_DAY_REPORT WHERE reportMonth = '${month}' GROUP BY dayofweek
                         ) B
                     ON A.dayofweek = B.dayofweek`;
@@ -222,6 +248,13 @@ class ReportQuery {
 
     searchMasterId( month ) {
         let sql = `select masterId from report.AD_DAY_REPORT WHERE reportMonth = '${month}' GROUP BY masterId`;
+        return this.syncQuery(sql);
+    }
+
+    searchDateTerm( month ) {
+        let sql = `SELECT 
+                        CONCAT(DATE_FORMAT(MIN(reportDate), '%Y-%m-%d'), ' ~ ', DATE_FORMAT(MAX(reportDate), '%Y-%m-%d')) as '기간'
+                    FROM report.AD_DAY_REPORT WHERE reportMonth = '${month}'`;
         return this.syncQuery(sql);
     }
 }

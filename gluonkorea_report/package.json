@@ -77,7 +77,6 @@
     "test": "node scripts/test.js --env=jsdom",
     "clean": "rimraf build",
     "eslint": "eslint ./serverSrc/*.js",
-    "svrbuild_back": "rm -r buildSvr && cp -Rv serverSrc buildSvr",
     "svrbuild": "NODE_ENV='production' babel --no-babelrc --presets stage-3 -d buildSvr serverSrc -s true",
     "svr": "npm run eslint && npm run svrbuild",
     "svrwatch": "watch 'npm run eslint' ./serverSrc",

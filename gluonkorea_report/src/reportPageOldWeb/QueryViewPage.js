@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Row, Col, Panel, Button, FormGroup, ControlLabel, FormControl } from 'react-bootstrap';
+import { Grid, Row, Col, Panel, Button, FormGroup, FormControl } from 'react-bootstrap';
 import TableView from './TableView';
 
 export default class QueryViewPage extends Component {

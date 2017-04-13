@@ -227,7 +227,6 @@ class App extends Component {
     }
 
     onLoadedCSV( opt ) {
-        console.log( );
         workerImp.postMessage( { type: 'loaddata', data: opt.data, name: opt.name } );
     }
 
