@@ -11,7 +11,7 @@ class ReportQuery {
             host: 'gluonkorea.cafe24.com',
             port: 3306,
             user: 'la9527',
-            password: PassEncrypt.decrypt('b167ab38b13b3bbffd45'),
+            password: PassEncrypt.decrypt('b167ab38b13b3bbfef'),
             database: 'report',
             connectTimeout: 3000,
             timezone: 'local',

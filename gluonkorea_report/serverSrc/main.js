@@ -3,6 +3,8 @@ let cors = require( 'cors');
 let bodyParser = require( 'body-parser' );
 let AdTmonSellerCrawler = require( './AdTmonSellerCrawler' );
 let ReportQuery = require( './ReportQuery' );
+let ReportQuery11st = require( './ReportQuery11st' );
+
 
 let listenPort = 3030;
 
@@ -26,6 +28,7 @@ let corsOptions = {
 let app = express();
 let router = express.Router();
 let reportQuery = new ReportQuery();
+let reportQuery11st = new ReportQuery11st();
 
 router.use(( req, res, next) => {
     console.log( req.method, req.url );
@@ -133,7 +136,45 @@ let requestUrlsInfo = [
     }
 ];
 
-let setRouterPostUrl= ( urlInfo ) => {
+let requestUrlsInfo11st = [
+    {
+        url: '/report11st/searchPossibleMonth',
+        funcName: 'searchPossibleMonth',
+        param: []
+    },
+    {
+        url: '/report11st/searchSellerId',
+        funcName: 'searchSellerId',
+        param: [ { name: 'month', must: true, desc: '월' } ]
+    },
+    {
+        url: '/report11st/totalReport',
+        funcName: 'totalReport',
+        param: [ { name: 'month', must: true, desc: '월' }, { name: 'sellerId', must: true, desc: 'sellerId' } ]
+    },
+    {
+        url: '/report11st/itemReport',
+        funcName: 'itemReport',
+        param: [ { name: 'month', must: true, desc: '월' }, { name: 'sellerId', must: true, desc: 'sellerId' } ]
+    },
+    {
+        url: '/report11st/itemSummaryReport',
+        funcName: 'itemSummaryReport',
+        param: [ { name: 'month', must: true, desc: '월' }, { name: 'sellerId', must: true, desc: 'sellerId' } ]
+    },
+    {
+        url: '/report11st/adAreaReport',
+        funcName: 'adAreaReport',
+        param: [ { name: 'month', must: true, desc: '월' }, { name: 'sellerId', must: true, desc: 'sellerId' } ]
+    },
+    {
+        url: '/report11st/adList',
+        funcName: 'adList',
+        param: [ { name: 'month', must: true, desc: '월' }, { name: 'sellerId', must: true, desc: 'sellerId' } ]
+    }
+];
+
+let setRouterPostUrl= ( reportQueryObj, urlInfo ) => {
     router.post(urlInfo.url, async (req, res) => {
         let postParams = req.body;
         let responseData = {success: false, msg: '', data: []};
@@ -170,7 +211,7 @@ let setRouterPostUrl= ( urlInfo ) => {
         console.log( 'ARGS', callArgs );
 
         try {
-            let result = await reportQuery[ urlInfo.funcName ].apply(reportQuery, callArgs);
+            let result = await reportQueryObj[ urlInfo.funcName ].apply(reportQueryObj, callArgs);
             if (result) {
                 console.log('SUCCESS', result);
                 res.status(200).json({success: true, data: result});
@@ -187,14 +228,20 @@ let setRouterPostUrl= ( urlInfo ) => {
 
 for ( let urlInfo of requestUrlsInfo ) {
     console.log( `Ready URLs - ${urlInfo.url}` );
-    setRouterPostUrl( urlInfo );
+    setRouterPostUrl( reportQuery, urlInfo );
 }
+
+for ( let urlInfo of requestUrlsInfo11st ) {
+    console.log( `Ready URLs - ${urlInfo.url}` );
+    setRouterPostUrl( reportQuery11st, urlInfo );
+}
+
 
 app.use(bodyParser.json());
 app.use( '*', cors(corsOptions) );
 app.use( '/', router );
 
-if (reportQuery.connect()) {
+if (reportQuery.connect() && reportQuery11st.connect() ) {
     let server = app.listen(listenPort, () => {
         console.log('Listening on port %d', server.address().port);
     });

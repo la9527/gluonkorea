@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './reportPage/App';
-//import TestApp from './TestApp';
+import App from './11stReportPage/App';
 import $ from 'jquery';
 
 $(document).ready(() => {
