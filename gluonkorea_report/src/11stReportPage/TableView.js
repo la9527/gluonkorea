@@ -33,7 +33,7 @@ export default class TableView extends Component {
 
         let headersHtml = headers.map((el, index) => (<th scope="col" title={el} key={('header'+index)}>{el}</th>));
 
-        let viewItems = this.props.tableData.slice(0, 100);
+        let viewItems = this.props.tableData.slice(0, 500);
 
         let viewItemBody = viewItems.map( (el, row) => {
             let elementHtml = headers.map((key, col) => (<td className="txt-center" key={('body_cell_'+ row + '_' + col)} onClick={() => { this.onCellClick(el); }}>{el[key]}</td>));
