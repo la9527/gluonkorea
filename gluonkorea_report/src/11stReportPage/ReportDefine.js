@@ -242,7 +242,11 @@ let ReportDefine = () => {
                         adCost.push( item['광고비'] );
                         adItemCost.push( item['광고상품 거래액'] );
                         try {
-                            adROASItemCost.push( parseInt(( item['광고상품 거래액'] / item['광고비']) * 100, 10));
+                            if ( item['광고상품 거래액'] > 0 ) {
+                                adROASItemCost.push( parseInt(( item['광고상품 거래액'] / item['광고비']) * 100, 10));
+                            } else {
+                                adROASItemCost.push( 0 );
+                            }
                         } catch( e ) {
                             adROASItemCost.push( 0 );
                         }
