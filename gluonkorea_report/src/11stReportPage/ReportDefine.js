@@ -2,6 +2,15 @@ import moment from 'moment';
 //import Highcharts from 'highcharts';
 let Highcharts = window.Highcharts;
 
+var commaPrice = (number) => {
+    var ret = number + '';
+    var reg = /(^[+-]?\d+)(\d{3})/;
+    while (reg.test(ret)) {
+        ret = ret.replace(reg, '$1,$2');
+    }
+    return ret;
+};
+
 let ReportDefine = () => {
     return {
         '리포트샘플': [
@@ -141,20 +150,22 @@ let ReportDefine = () => {
                     let adCost = excelInfo.getData( { y: 11, x: 2, rows: 2, cols: 1 } );
                     let adItemCost = excelInfo.getData( { y: 11, x: 3, rows: 2, cols: 1 } );
                     let adROASItemCost = excelInfo.getData( { y: 11, x: 5, rows: 2, cols: 1, percent: true } );
+
                     let chartInfo = {
                          credits: { enabled: false },
                          chart: {
-                            zoomType: 'xy'
+                             // zoomType: 'xy'
+                             type: 'bar'
                          },
                          title: {
-                             text: '전월 비교 현황'
+                             text: null
                          },
                          xAxis: [{
                             categories: categories
                          }],
                          yAxis: [{ // Primary yAxis
                             labels: {
-                                format: '{value}',
+                                format: '{value}%',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -167,13 +178,15 @@ let ReportDefine = () => {
                             }
                         }, { // Secondary yAxis
                             title: {
-                                text: '거래액',
+                                text: null,
                                 style: {
                                     color: Highcharts.getOptions().colors[0]
                                 }
                             },
                             labels: {
-                                format: '{value}원',
+                                formatter: function() {
+                                    return commaPrice(this.value / 1000) + '천'
+                                }, 
                                 style: {
                                     color: Highcharts.getOptions().colors[0]
                                 }
@@ -191,7 +204,7 @@ let ReportDefine = () => {
                             dataLabels: {
                             enabled: true,
                                 formatter: function () {
-                                    return this.y;
+                                    return commaPrice(this.y);
                                 }
                             }
                         }, {
@@ -202,7 +215,7 @@ let ReportDefine = () => {
                             dataLabels: {
                             enabled: true,
                                 formatter: function () {
-                                    return this.y;
+                                    return commaPrice(this.y);
                                 }
                             }
                         }, {
@@ -212,7 +225,7 @@ let ReportDefine = () => {
                             dataLabels: {
                                 enabled: true,
                                 formatter: function () {
-                                    return this.y + '%';
+                                    return commaPrice(this.y) + '%';
                                 }
                             }
                         }]
@@ -242,7 +255,7 @@ let ReportDefine = () => {
                         adCost.push( item['광고비'] );
                         adItemCost.push( item['광고상품 거래액'] );
                         try {
-                            if ( item['광고상품 거래액'] > 0 ) {
+                            if ( item['광고상품 거래액'] > 0 && item['광고비'] > 0 ) {
                                 adROASItemCost.push( parseInt(( item['광고상품 거래액'] / item['광고비']) * 100, 10));
                             } else {
                                 adROASItemCost.push( 0 );
@@ -258,14 +271,14 @@ let ReportDefine = () => {
                             zoomType: 'xy'
                          },
                          title: {
-                             text: '상품번호별 비교 현황'
+                             text: null
                          },
                          xAxis: [{
                             categories: categories
                          }],
                          yAxis: [{ // Primary yAxis
                             labels: {
-                                format: '{value}',
+                                format: '{value}%',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -284,7 +297,9 @@ let ReportDefine = () => {
                                 }
                             },
                             labels: {
-                                format: '{value}원',
+                                formatter: function() {
+                                    return commaPrice(this.value / 1000) + '천'
+                                }, 
                                 style: {
                                     color: Highcharts.getOptions().colors[0]
                                 }
@@ -302,7 +317,7 @@ let ReportDefine = () => {
                             dataLabels: {
                                 enabled: true,
                                 formatter: function () {
-                                    return this.y;
+                                    return commaPrice(this.y);
                                 }
                             }
                         }, {
@@ -313,7 +328,7 @@ let ReportDefine = () => {
                             dataLabels: {
                             enabled: true,
                                 formatter: function () {
-                                    return this.y;
+                                    return commaPrice(this.y);
                                 }
                             }
                         }, {
@@ -323,7 +338,7 @@ let ReportDefine = () => {
                             dataLabels: {
                                 enabled: true,
                                 formatter: function () {
-                                    return this.y + '%';
+                                    return commaPrice(this.y) + '%';
                                 }
                             }
                         }]
