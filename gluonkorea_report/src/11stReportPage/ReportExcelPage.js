@@ -5,6 +5,28 @@ import FileSaver from 'file-saver';
 import $ from 'jquery';
 
 let GC = window.GC;
+let Highcharts = window.Highcharts;
+
+class ReportData {
+    constructor( sheet ) {
+        this.sheet = sheet;
+    }
+    getData( props ) {
+        if ( !this.sheet ) return null;
+
+        let values = [];
+        for ( var x = props.x; x < (props.x + props.cols); x++ ) {
+            for ( var y = props.y; y < (props.y + props.rows); y++ ) {
+                let value = this.sheet.getCell( y, x ).value() || 0;
+                if ( props.percent ) {
+                    value = parseInt(value * 100, 10);
+                }
+                values.push( value );
+            }
+        }
+        return values;
+    }
+}
 
 class ReportExcelPage extends Component {
     constructor(props) {
@@ -21,6 +43,7 @@ class ReportExcelPage extends Component {
     }
 
     sheetReportUpdate( tableName, reportTableData ) {
+        let that = this;
         let spread = this._spread;
         if ( !reportTableData.excelTmplInfo ) {
             console.error( 'NOT DEFINED - reportTableData.excelTmplInfo', reportTableData.title );
@@ -33,6 +56,53 @@ class ReportExcelPage extends Component {
             return;
         }
         console.log( 'SheetName - FOUND : ', reportTableData.excelTmplInfo.sheetName );
+
+        if ( reportTableData.type === 'chart' && reportTableData.chartDataFunc ) {
+            let position = reportTableData.excelTmplInfo.position;
+
+            let divElement = document.createElement('div');
+            this.refs.chart.appendChild( divElement );
+
+            let width = position.width + 'px', height = position.height + 'px';
+            divElement.style.width = width;
+            divElement.style.minWidth = width;
+            divElement.style.maxWidth = width;
+            divElement.style.height = height;
+            divElement.style.minHeight = height;
+            divElement.style.maxHeight = height;
+
+            reportTableData.chartEndRun = () => {
+                let chartData = reportTableData.chartDataFunc( that._reportData, new ReportData( sheet ) );
+                let chart = Highcharts.chart( divElement, chartData );
+
+                var svgData = chart.getSVG({
+                    exporting: {
+                        sourceWidth: chart.chartWidth,
+                        sourceHeight: chart.chartHeight
+                    }
+                });
+
+                var canvas = document.createElement('canvas');
+                canvas.width = chart.chartWidth;
+                canvas.height = chart.chartHeight;
+                var ctx = canvas.getContext('2d');
+
+                var img = document.createElement('img');
+                img.setAttribute('src', 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData))));
+                img.onload = function() {
+                    ctx.drawImage(img, 0, 0);
+                    sheet.pictures.add( reportTableData.title, canvas.toDataURL('image/png'), position.x, position.y, position.width, position.height );
+
+                    var picture = sheet.pictures.get(reportTableData.title);
+                    picture.pictureStretch(GC.Spread.Sheets.ImageLayout.center);
+                    picture.borderColor("Gray");
+                    picture.borderWidth(2);
+
+                    divElement.remove();
+                };
+            };
+            return;
+        }
 
         let dataset = reportTableData.data;
         if ( !dataset ) {
@@ -125,6 +195,21 @@ class ReportExcelPage extends Component {
         });
         that._spread.resumeCalcService(true);
         that._spread.resumePaint();
+
+        tabNames.map( (tabName, tabIndex) => {
+            let reportSheetData = reportData[tabName];
+            if ( reportSheetData.constructor === Array ) { // isArray Check
+                reportSheetData.map( (reportTableData, index) => {
+                    if ( typeof(reportTableData.chartEndRun) === 'function' ) {
+                        setTimeout( reportTableData.chartEndRun, 1 );
+                    }
+                });
+            } else {
+                if ( typeof(reportSheetData.chartEndRun) === 'function' ) {
+                    setTimeout( reportSheetData.chartEndRun, 1 );
+                }
+            }
+        });
     }
 
     viewExcelData(reportData) {
@@ -346,6 +431,7 @@ class ReportExcelPage extends Component {
                 </ButtonToolbar>
                 <hr />
                 <div style={spreadStyle} ref="spread" />
+                <div ref="chart" />
             </div>
         );
     }

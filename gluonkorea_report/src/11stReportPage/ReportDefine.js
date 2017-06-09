@@ -1,10 +1,12 @@
 import moment from 'moment';
+//import Highcharts from 'highcharts';
+let Highcharts = window.Highcharts;
 
 let ReportDefine = () => {
     return {
         '리포트샘플': [
             {
-                title: '월별 집행 요약',
+                title: '월별 집행 요약_1',
                 url: '/report11st/totalReport',
                 params: {
                     month: '',
@@ -22,7 +24,7 @@ let ReportDefine = () => {
                 }
             },
             {
-                title: '월별 집행 요약',
+                title: '월별 집행 요약_2',
                 url: '/report11st/totalReport',
                 params: {
                     month: '',
@@ -120,6 +122,211 @@ let ReportDefine = () => {
                         'sellerId': { x: 2, y: 3 },
                         'runTime': { x: 5, y: 3 }
                     }
+                }
+            },
+            {
+                title: 'ChartOne',
+                type: 'chart',
+                excelTmplInfo: {
+                    sheetName: '리포트샘플',
+                    position: {
+                        x: 10,
+                        y: 450,
+                        width: 800,
+                        height: 290
+                    }
+                },
+                chartDataFunc: ( thisRef, excelInfo ) => {
+                    let categories = excelInfo.getData( { y: 11, x: 1, rows: 2, cols: 1 } );
+                    let adCost = excelInfo.getData( { y: 11, x: 2, rows: 2, cols: 1 } );
+                    let adItemCost = excelInfo.getData( { y: 11, x: 3, rows: 2, cols: 1 } );
+                    let adROASItemCost = excelInfo.getData( { y: 11, x: 5, rows: 2, cols: 1, percent: true } );
+                    let chartInfo = {
+                         credits: { enabled: false },
+                         chart: {
+                            zoomType: 'xy'
+                         },
+                         title: {
+                             text: '전월 비교 현황'
+                         },
+                         xAxis: [{
+                            categories: categories
+                         }],
+                         yAxis: [{ // Primary yAxis
+                            labels: {
+                                format: '{value}',
+                                style: {
+                                    color: Highcharts.getOptions().colors[1]
+                                }
+                            },
+                            title: {
+                                text: 'ROAS',
+                                style: {
+                                    color: Highcharts.getOptions().colors[1]
+                                }
+                            }
+                        }, { // Secondary yAxis
+                            title: {
+                                text: '거래액',
+                                style: {
+                                    color: Highcharts.getOptions().colors[0]
+                                }
+                            },
+                            labels: {
+                                format: '{value}원',
+                                style: {
+                                    color: Highcharts.getOptions().colors[0]
+                                }
+                            },
+                            opposite: true
+                        }],
+                        tooltip: {
+                            shared: true
+                        },
+                        series: [{
+                            name: '광고비',
+                            type: 'column',
+                            yAxis: 1,
+                            data: adCost,
+                            dataLabels: {
+                            enabled: true,
+                                formatter: function () {
+                                    return this.y;
+                                }
+                            }
+                        }, {
+                            name: '광고상품거래액',
+                            type: 'column',
+                            yAxis: 1,
+                            data: adItemCost,
+                            dataLabels: {
+                            enabled: true,
+                                formatter: function () {
+                                    return this.y;
+                                }
+                            }
+                        }, {
+                            name: 'ROAS',
+                            type: 'spline',
+                            data: adROASItemCost,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return this.y + '%';
+                                }
+                            }
+                        }]
+                    };
+                    return chartInfo;
+                }
+            },
+            {
+                title: 'ChartTwo',
+                type: 'chart',
+                excelTmplInfo: {
+                    sheetName: '리포트샘플',
+                    position: {
+                        x: 10,
+                        y: 930,
+                        width: 950,
+                        height: 290
+                    }
+                },
+                chartDataFunc: ( thisRef, excelInfo ) => {
+                    let viewItems = thisRef.List.data.slice(0, 10);
+
+                    let categories = [], adCost = [], adItemCost = [], adROASItemCost = [];
+
+                    for ( var item of viewItems ) {
+                        categories.push( item['상품번호'] );
+                        adCost.push( item['광고비'] );
+                        adItemCost.push( item['광고상품 거래액'] );
+                        try {
+                            adROASItemCost.push( parseInt(( item['광고상품 거래액'] / item['광고비']) * 100, 10));
+                        } catch( e ) {
+                            adROASItemCost.push( 0 );
+                        }
+                    }
+
+                    let chartInfo = {
+                         credits: { enabled: false },
+                         chart: {
+                            zoomType: 'xy'
+                         },
+                         title: {
+                             text: '상품번호별 비교 현황'
+                         },
+                         xAxis: [{
+                            categories: categories
+                         }],
+                         yAxis: [{ // Primary yAxis
+                            labels: {
+                                format: '{value}',
+                                style: {
+                                    color: Highcharts.getOptions().colors[1]
+                                }
+                            },
+                            title: {
+                                text: 'ROAS',
+                                style: {
+                                    color: Highcharts.getOptions().colors[1]
+                                }
+                            }
+                        }, { // Secondary yAxis
+                            title: {
+                                text: '거래액',
+                                style: {
+                                    color: Highcharts.getOptions().colors[0]
+                                }
+                            },
+                            labels: {
+                                format: '{value}원',
+                                style: {
+                                    color: Highcharts.getOptions().colors[0]
+                                }
+                            },
+                            opposite: true
+                        }],
+                        tooltip: {
+                            shared: true
+                        },
+                        series: [{
+                            name: '광고비',
+                            type: 'column',
+                            yAxis: 1,
+                            data: adCost,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return this.y;
+                                }
+                            }
+                        }, {
+                            name: '광고상품거래액',
+                            type: 'column',
+                            yAxis: 1,
+                            data: adItemCost,
+                            dataLabels: {
+                            enabled: true,
+                                formatter: function () {
+                                    return this.y;
+                                }
+                            }
+                        }, {
+                            name: 'ROAS',
+                            type: 'spline',
+                            data: adROASItemCost,
+                            dataLabels: {
+                                enabled: true,
+                                formatter: function () {
+                                    return this.y + '%';
+                                }
+                            }
+                        }]
+                    };
+
+                    console.log( 'CHART TWO : ', chartInfo );
+                    return chartInfo;
                 }
             }
         ],
