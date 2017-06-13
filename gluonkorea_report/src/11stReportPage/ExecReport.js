@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import ReportExcelPage from './ReportExcelPage';
 import ReportDefine from './ReportDefine';
+import Config from './Config';
 
 export default class ExecReport extends Component {
     constructor(props) {
@@ -31,7 +32,7 @@ export default class ExecReport extends Component {
                 console.log( 'item.funcCall !!!' );
                 item.funcCall(item);
             } else if ( item.url ) {
-                let url = 'http://' + location.hostname + ':3030' + item.url;
+                let url = Config.Server + item.url;
                 console.log( `URL : ${url}`, 'PARAM:', item.params);
                 let result = await axios.post( url, item.params, { responseType: 'json' });
                 if ( result.data.success && result.data.data ) {
@@ -51,7 +52,6 @@ export default class ExecReport extends Component {
             }
         }
 
-        console.log( 'A !!' );
         this.setState( { ...this.state, viewLoading: false } );
     }
 

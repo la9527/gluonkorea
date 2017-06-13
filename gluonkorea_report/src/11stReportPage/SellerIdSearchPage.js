@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { Form, FormGroup, FormControl, DropdownButton, MenuItem, Button, Panel } from 'react-bootstrap';
 import TableView from './TableView';
+import Config from './Config';
 
 export default class SellerIDSelectPage extends Component {
     constructor(props) {
@@ -21,7 +22,7 @@ export default class SellerIDSelectPage extends Component {
     async updatePosibleMonth() {
         let that = this;
         this._choiceMonth = '';
-        let url = 'http://' + location.hostname + ':3030/report11st/searchPossibleMonth';
+        let url = Config.Server + '/report11st/searchPossibleMonth';
         try {
             let response = await axios.post(url,{ month: that._month }, { responseType: 'json' }).catch( (el) => { throw (''+el); } );
             if ( response.data && response.data.success ) {
@@ -30,9 +31,14 @@ export default class SellerIDSelectPage extends Component {
                 });
                 this.setState( { ...this.state, monthData: monthData } );
             } else {
+                if ( response.data && response.data.loginfail ) {
+                    alert( response.data.msg );
+                    location.replace('/');
+                }
                 this.setState( { ...this.state, monthData: [] } );
             }
         } catch( e ) {
+            alert( e );
             that.setState({
                     ...that.state,
                     monthData: [],
@@ -69,8 +75,9 @@ export default class SellerIDSelectPage extends Component {
                 msg: null
             });
         } else {
-            let url = 'http://' + location.hostname + ':3030/report11st/searchSellerId';
+            let url = Config.Server + '/report11st/searchSellerId';
             try {
+
                 that._orignalData = [];                
                 let response = await axios.post(url,{ month: that._choiceMonth }, { responseType: 'json' }).catch( (error) => { throw `${''+error}` } );
                 if (response) {

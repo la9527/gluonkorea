@@ -17,10 +17,10 @@
     <script type="text/javascript" src="./external_js/gc.spread.excelio.10.0.0.js"></script>
 
     <% for (var i in htmlWebpackPlugin.files.css) { %>
-    <link href="<%= htmlWebpackPlugin.files.css[i] %>" rel="stylesheet" />
+    <link href=".<%= htmlWebpackPlugin.files.css[i] %>" rel="stylesheet" />
     <% } %>
     <% for (var i in htmlWebpackPlugin.files.js) { %>
-    <script type="text/javascript" src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+    <script type="text/javascript" src=".<%= htmlWebpackPlugin.files.js[i] %>"></script>
     <% } %>
   </head>
   <body>

@@ -201,10 +201,11 @@ module.exports = {
     new InterpolateHtmlPlugin(env.raw),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
-      inject: true,
+      inject: false,
       chunks: [ 'main' ],
       template: paths.appHtml,
       filename: 'index.html',
+      /*
       minify: {
         removeComments: true,
         collapseWhitespace: true,
@@ -217,6 +218,7 @@ module.exports = {
         minifyCSS: true,
         minifyURLs: true
       }
+      */
     }),
     new HtmlWebpackPlugin({
         inject: false,
