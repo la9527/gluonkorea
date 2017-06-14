@@ -113,10 +113,10 @@ class ReportExcelPage extends Component {
         console.log( reportTableData.excelTmplInfo );
 
         let viewSet = reportTableData.excelTmplInfo.viewSet;
-        if ( viewSet && Array.isArray(viewSet) === false && dataset.length === 1 ) {
+        if ( viewSet && Array.isArray(viewSet) === false ) {
             for ( var key in viewSet ) {
                 let cell = sheet.getCell( viewSet[key].y, viewSet[key].x );
-                if ( typeof(dataset[0][key]) !== 'undefined' ) {
+                if ( dataset.length > 0 && typeof(dataset[0][key]) !== 'undefined' ) {
                     cell.value( dataset[0][key] );
                     cell.formula('');
                 } else {

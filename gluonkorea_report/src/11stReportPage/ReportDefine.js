@@ -15,6 +15,22 @@ let ReportDefine = () => {
     return {
         '리포트샘플': [
             {
+                title: '담당자 설정',
+                url: '/report11st/userInfo',
+                params: {
+                    month: '',
+                    sellerId: ''
+                },
+                excelTmplInfo: {
+                    sheetName: '리포트샘플',
+                    viewSet: {
+                        'name': { x: 5, y: 4 },
+                        'contact1': { x: 5, y: 5 },
+                        'contact2': { x: 5, y: 6 }
+                    }
+                }
+            },
+            {
                 title: '월별 집행 요약_1',
                 url: '/report11st/totalReport',
                 params: {
@@ -171,7 +187,7 @@ let ReportDefine = () => {
                                 }
                             },
                             title: {
-                                text: 'ROAS',
+                                text: 'ROI',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -219,7 +235,7 @@ let ReportDefine = () => {
                                 }
                             }
                         }, {
-                            name: 'ROAS',
+                            name: 'ROI',
                             type: 'spline',
                             data: adROASItemCost,
                             dataLabels: {
@@ -284,7 +300,7 @@ let ReportDefine = () => {
                                 }
                             },
                             title: {
-                                text: 'ROAS',
+                                text: 'ROI',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -332,7 +348,7 @@ let ReportDefine = () => {
                                 }
                             }
                         }, {
-                            name: 'ROAS',
+                            name: 'ROI',
                             type: 'spline',
                             data: adROASItemCost,
                             dataLabels: {
