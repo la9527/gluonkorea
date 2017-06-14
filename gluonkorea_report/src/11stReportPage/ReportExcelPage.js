@@ -93,10 +93,12 @@ class ReportExcelPage extends Component {
                     ctx.drawImage(img, 0, 0);
                     sheet.pictures.add( reportTableData.title, canvas.toDataURL('image/png'), position.x, position.y, position.width, position.height );
 
+                    /*
                     var picture = sheet.pictures.get(reportTableData.title);
                     picture.pictureStretch(GC.Spread.Sheets.ImageLayout.center);
                     picture.borderColor("Gray");
                     picture.borderWidth(2);
+                    */
 
                     divElement.remove();
                 };

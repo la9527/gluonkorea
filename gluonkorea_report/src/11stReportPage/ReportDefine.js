@@ -13,7 +13,7 @@ var commaPrice = (number) => {
 
 let ReportDefine = () => {
     return {
-        '리포트샘플': [
+        '리포트': [
             {
                 title: '담당자 설정',
                 url: '/report11st/userInfo',
@@ -22,7 +22,7 @@ let ReportDefine = () => {
                     sellerId: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     viewSet: {
                         'name': { x: 5, y: 4 },
                         'contact1': { x: 5, y: 5 },
@@ -38,7 +38,7 @@ let ReportDefine = () => {
                     sellerId: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     position: {
                         startX: 1,
                         startY: 11,
@@ -59,7 +59,7 @@ let ReportDefine = () => {
                     item.params.month = moment(item.params.month, "YYYYMM").subtract(1, 'month').format('YYYYMM');
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     position: {
                         startX: 1,
                         startY: 12,
@@ -77,7 +77,7 @@ let ReportDefine = () => {
                     sellerId: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     viewSet: {
                         '광고상품총거래액': { x: 2, y: 59 },
                         '광고낙찰건수': { x: 4, y: 59 },
@@ -95,7 +95,7 @@ let ReportDefine = () => {
                     sellerId: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     position: {
                         startX: 1,
                         startY: 60,
@@ -113,7 +113,7 @@ let ReportDefine = () => {
                     sellerId: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     viewSet: {
                         '전시 광고낙찰건수': { x: 4, y: 36 },
                         '전시 광고비': { x: 5, y: 36 },
@@ -142,7 +142,7 @@ let ReportDefine = () => {
                     month: ''
                 },
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     viewSet: {
                         'sellerId': { x: 2, y: 3 },
                         'runTime': { x: 5, y: 3 }
@@ -153,7 +153,7 @@ let ReportDefine = () => {
                 title: 'ChartOne',
                 type: 'chart',
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     position: {
                         x: 10,
                         y: 450,
@@ -253,7 +253,7 @@ let ReportDefine = () => {
                 title: 'ChartTwo',
                 type: 'chart',
                 excelTmplInfo: {
-                    sheetName: '리포트샘플',
+                    sheetName: '리포트',
                     position: {
                         x: 10,
                         y: 930,
