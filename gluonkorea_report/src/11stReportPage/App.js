@@ -89,11 +89,11 @@ class App extends Component {
             this.setState({
                 ...this.state,
                 viewpage: {
-                    name: PAGE_TYPE.SELLERID_SELECT
+                    name: PAGE_TYPE.SELLERID_SELECT,
+                    month: sessionStorage.getItem("month"),
+                    sellerId: sessionStorage.getItem("sellerId")
                 }
             });
-        } else {
-            this.refs.sellerIdPage.onRunSql();
         }
     }
 
@@ -106,6 +106,8 @@ class App extends Component {
                 sellerId: sellerId
             }
         });
+        sessionStorage.setItem("month", month);
+        sessionStorage.setItem("sellerId", sellerId);
     }
 
     render() {
@@ -119,7 +121,7 @@ class App extends Component {
             if ( that.state.viewpage.name === PAGE_TYPE.SELLERID_SELECT ) {
                 console.log( 'pageControl :: REPORT' );
                 component = (
-                    <SellerIdSearchPage ref="sellerIdPage" onSellerClick={::this.onSellerIdClick} />
+                    <SellerIdSearchPage ref="sellerIdPage" onSellerClick={::this.onSellerIdClick} sellerId={that.state.viewpage.sellerId} month={that.state.viewpage.month} />
                 );
             } else if ( that.state.viewpage.name === PAGE_TYPE.REPORT ) {
                 console.log('pageControl :: REPORT');

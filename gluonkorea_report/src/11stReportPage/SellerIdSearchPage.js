@@ -29,13 +29,17 @@ export default class SellerIDSelectPage extends Component {
                 let monthData = response.data.data.map( (el) => {
                     return Object.values(el)[0];
                 });
-                this.setState( { ...this.state, monthData: monthData } );
+
+                this.setState( { ...this.state, monthData: monthData, scrollTop: 0 } );
+                if ( this.props.month ) {
+                    this.onDropDownBtn( this.props.month );
+                }
             } else {
                 if ( response.data && response.data.loginfail ) {
                     alert( response.data.msg );
                     location.replace('/');
                 }
-                this.setState( { ...this.state, monthData: [] } );
+                this.setState( { ...this.state, monthData: [], scrollTop: 0 } );
             }
         } catch( e ) {
             alert( e );
@@ -43,7 +47,8 @@ export default class SellerIDSelectPage extends Component {
                     ...that.state,
                     monthData: [],
                     table: null,
-                    msg: e
+                    msg: e,
+                    scrollTop: 0
                 });
         }
     }
@@ -72,7 +77,10 @@ export default class SellerIDSelectPage extends Component {
             that.setState({
                 ...that.state,
                 table: viewData,
-                msg: null
+                msg: null,
+                scrollTop: 0
+            }, () => {
+                that.refs.tableView.setState( { highlight: '' } );
             });
         } else {
             let url = Config.Server + '/report11st/searchSellerId';
@@ -86,6 +94,17 @@ export default class SellerIDSelectPage extends Component {
 
                         if ( that._orignalData.length > 0 ) {
                             that.onSearchID();
+
+                            let scrollTop = sessionStorage.getItem("tableViewScrollTop") || 0;
+                            scrollTop = isNaN(scrollTop) ? 0 : parseInt(scrollTop, 10);
+                            that.setState( { ...that.state, scrollTop }, () => {
+                                if ( sessionStorage.getItem("sellerId") ) {
+                                    that.refs.tableView.setState( { highlight: "sellerId=" + sessionStorage.getItem("sellerId") } );
+                                } else {
+                                    that.refs.tableView.setState( {} );
+                                }
+                                that.refs.tableView.setScroll( scrollTop );
+                            });
                         }
                     } else {
                         throw `${response.data.msg}`;
@@ -95,16 +114,23 @@ export default class SellerIDSelectPage extends Component {
                 that.setState({
                     ...that.state,
                     table: null,
-                    msg: e
+                    msg: e,
+                    scrollTop: 0
                 });
             }
         }
+    }
+
+    componentWillMount() {
+
     }
 
     componentDidMount() {
         let that = this;
         window.addEventListener('resize', ::this.onUpdateResize);
         that.updatePosibleMonth();
+
+        
     }
 
     componentWillUnmount() {
@@ -117,14 +143,26 @@ export default class SellerIDSelectPage extends Component {
 
     onSellerClick( element ) {
         console.log( element );
+        if ( this.refs.tableView ) {
+            sessionStorage.setItem( "tableViewScrollTop", this.refs.tableView.getScroll() );
+        }
         if ( this.props.onSellerClick ) {
             this.props.onSellerClick(this._choiceMonth, element.sellerId );
         }
     }
 
+    onRefresh() {
+        sessionStorage.removeItem("month");
+        sessionStorage.removeItem("sellerId");
+        sessionStorage.removeItem("tableViewScrollTop");
+        this.onSearchID(null, 'clear');
+    }
+
     onDropDownBtn( eventKey, e ) {
         if ( e ) {
             e.preventDefault();
+            sessionStorage.removeItem("tableViewScrollTop");
+            sessionStorage.removeItem("sellerId");
         }
 
         this.refs.dropDownBtn.title = eventKey;
@@ -157,9 +195,12 @@ export default class SellerIDSelectPage extends Component {
             'overflowY': 'scroll'
         };
 
+        let highlight = "sellerId=" + this.props.sellerId;
+
         let tableView = () => {
             if ( this.state.monthData && this.state.monthData.length > 0 ) {
-                return <TableView style={tabbodyStyle} tableData={this.state.table} onCellClick={::this.onSellerClick}/>;
+                return <TableView ref="tableView" style={tabbodyStyle} tableData={this.state.table} onCellClick={::this.onSellerClick} scrollTop={this.state.scrollTop} 
+                        highlight={highlight} />;
             }
             return null;
         };
@@ -178,7 +219,7 @@ export default class SellerIDSelectPage extends Component {
                         {monthItems}
                     </DropdownButton>
                     {' '}
-                    <Button bsStyle="primary" onClick={ev => { this.onSearchID(ev, 'clear'); }}>새로고침</Button>
+                    <Button bsStyle="primary" onClick={ev => { this.onRefresh(); }}>새로고침</Button>
                     {' '}
                     <FormGroup controlId="sellerIdInput" style={{margin:'0'}}>
                         <FormControl inputRef={ref => { this.inputText = ref; }} type="text" placeholder="검색 필터" onKeyUp={::this.onSearchID} />
