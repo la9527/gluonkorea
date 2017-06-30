@@ -1,5 +1,5 @@
 var Config = {
-    Server: 'http://localhost:3000', // default
+    Server: '', // default
 };
 
 export default Config;
