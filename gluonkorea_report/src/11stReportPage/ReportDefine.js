@@ -70,24 +70,6 @@ let ReportDefine = () => {
                 }
             },
             {
-                title: '상품번호별 광고 요약 합계',
-                url: '/report11st/itemSummaryReport',
-                params: {
-                    month: '',
-                    sellerId: ''
-                },
-                excelTmplInfo: {
-                    sheetName: '리포트',
-                    viewSet: {
-                        '광고상품총거래액': { x: 2, y: 59 },
-                        '광고낙찰건수': { x: 4, y: 59 },
-                        '광고비': { x: 5, y: 59 },
-                        '노출수': { x: 6, y: 59 },
-                        '클릭수': { x: 7, y: 59 }
-                    }
-                }
-            },
-            {
                 title: '상품번호별 광고 요약',
                 url: '/report11st/itemReport',
                 params: {
@@ -101,8 +83,37 @@ let ReportDefine = () => {
                         startY: 60,
                         baseWidth: 8
                     },
-                    fixHeight: 7,
-                    addAuto: true
+                    fixHeight: 2,
+                    addAuto: true,
+                    sameMergeRowsPos: [ 0, 1 ]
+                }
+            },
+            {
+                title: '상품번호별 광고 요약 합계',
+                url: '/report11st/itemSummaryReport',
+                params: {
+                    month: '',
+                    sellerId: ''
+                },
+                excelTmplInfo: {
+                    sheetName: '리포트',
+                    viewSet: {
+                        '광고상품총거래액': { x: 2, y: 60 },
+                        '광고비': { x: 4, y: 60 },
+                        '노출수': { x: 5, y: 60 },
+                        '클릭수': { x: 6, y: 60 }
+                    },
+                    viewSetFunc: (fullItem, thisItem) => {
+                        if ( !thisItem.reCall ) {
+                            let items = fullItem.filter(el => el.url==='/report11st/itemReport');
+                            let beforeItemDepth = items[0].data.length;
+                            let viewSet = thisItem.excelTmplInfo.viewSet;
+                            Object.keys(viewSet).forEach((key) => {
+                                viewSet[key].y += beforeItemDepth;
+                            });
+                        }
+                        thisItem.reCall = true;
+                    }
                 }
             },
             {
@@ -115,13 +126,12 @@ let ReportDefine = () => {
                 excelTmplInfo: {
                     sheetName: '리포트',
                     viewSet: {
-                        '전시 광고낙찰건수': { x: 4, y: 36 },
-                        '전시 광고비': { x: 5, y: 36 },
-                        '전시 노출수': { x: 6, y: 36 },
-                        '전시 클릭수': { x: 7, y: 36 },
-                        'HOT 광고비': { x: 5, y: 37 },
-                        'HOT 노출수': { x: 6, y: 37 },
-                        'HOT 클릭수': { x: 7, y: 37 },
+                        '전시 광고비': { x: 4, y: 36 },
+                        '전시 노출수': { x: 5, y: 36 },
+                        '전시 클릭수': { x: 6, y: 36 },
+                        'HOT 광고비': { x: 4, y: 37 },
+                        'HOT 노출수': { x: 5, y: 37 },
+                        'HOT 클릭수': { x: 6, y: 37 },
                         'TOTAL': { x: 3, y: 38 }
                     }
                 }
@@ -170,8 +180,8 @@ let ReportDefine = () => {
                     let chartInfo = {
                          credits: { enabled: false },
                          chart: {
-                             // zoomType: 'xy'
-                             type: 'bar'
+                             zoomType: 'xy'
+                             //type: 'bar'
                          },
                          title: {
                              text: null
@@ -373,7 +383,7 @@ let ReportDefine = () => {
                 sellerId: ''
             },
             excelTmplInfo: {
-                sheetName: '상품별_그래프',
+                sheetName: '상품별_raw',
                 position: {
                     startX: 0,
                     startY: 1,

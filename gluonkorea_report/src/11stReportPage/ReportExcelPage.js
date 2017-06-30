@@ -42,7 +42,7 @@ class ReportExcelPage extends Component {
         sellerId: React.PropTypes.string
     }
 
-    sheetReportUpdate( tableName, reportTableData ) {
+    sheetReportUpdate( tableName, reportTableData, sheetReportUpdate ) {
         let that = this;
         let spread = this._spread;
         if ( !reportTableData.excelTmplInfo ) {
@@ -114,7 +114,10 @@ class ReportExcelPage extends Component {
 
         console.log( reportTableData.excelTmplInfo );
 
-        let viewSet = reportTableData.excelTmplInfo.viewSet;
+        let { viewSet, viewSetFunc } = reportTableData.excelTmplInfo;
+        if ( viewSetFunc ) {
+            viewSetFunc( sheetReportUpdate, reportTableData );
+        }
         if ( viewSet && Array.isArray(viewSet) === false ) {
             for ( var key in viewSet ) {
                 let cell = sheet.getCell( viewSet[key].y, viewSet[key].x );
@@ -178,6 +181,34 @@ class ReportExcelPage extends Component {
                 sheet.clear( startY + dataset.length, startX, fillHeight, baseWidth, GC.Spread.Sheets.SheetArea.viewport,GC.Spread.Sheets.StorageType.data + GC.Spread.Sheets.StorageType.style);
             }
         }
+
+        if ( reportTableData.excelTmplInfo.sameMergeRowsPos ) {
+            let sameMergeRowsPos = reportTableData.excelTmplInfo.sameMergeRowsPos;
+            let mergeFind = (elName) => {
+                let item = [];
+                let pos = {};
+                dataset.map( (el, y) => {
+                    if ( pos.data === el[ elName ] ) {
+                        pos.depth++;
+                    } else {
+                        if ( pos.depth > 1 ) {
+                            item.push( Object.assign( {}, pos ) );
+                        }
+                        pos.startPos = y;
+                        pos.depth = 1;
+                        pos.data = el[ elName ];
+                    }
+                });
+                return item;
+            };
+            
+            let colNames = Object.getOwnPropertyNames(dataset[0]);
+            for ( let posX of sameMergeRowsPos ) {
+                mergeFind( colNames[posX] ).map( (el) => {
+                    sheet.addSpan( startY + el.startPos, startX + posX, el.depth, 1, GC.Spread.Sheets.SheetArea.viewport );
+                });
+            }
+        }
     }
 
     viewTemplateSetExcelData( reportData ) {
@@ -189,7 +220,7 @@ class ReportExcelPage extends Component {
             let reportSheetData = reportData[tabName];
             if ( reportSheetData.constructor === Array ) { // isArray Check
                 reportSheetData.map( (reportTableData, index) => {
-                    that.sheetReportUpdate('Sheet' + tabIndex + 'Table' + index, reportTableData);
+                    that.sheetReportUpdate('Sheet' + tabIndex + 'Table' + index, reportTableData, reportSheetData );
                 });
             } else {
                 that.sheetReportUpdate('Sheet' + tabIndex + 'Table1', reportSheetData);

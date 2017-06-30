@@ -45,10 +45,22 @@ export default class ExecReport extends Component {
         for ( let key in this.reportQuery ) {
             if ( Array.isArray(this.reportQuery[key] ) ) {
                 for ( let item of this.reportQuery[key] ) {
-                    await getData(item).catch( (e) => { item.res = []; item.msg = e; console.log( 'getDATA - ERROR: ' + e); });
+                    try {
+                        await getData(item);
+                    } catch( e ) {
+                        item.res = [];
+                        item.msg = e;
+                        console.log( 'getDATA - ERROR: ' + e);
+                    }
                 }
             } else {
-                await getData(this.reportQuery[key]).catch( (e) => { this.reportQuery[key].res = []; this.reportQuery[key].msg = e; console.log( 'getDATA - ERROR: ' + e); });
+                try {
+                    await getData(this.reportQuery[key]);
+                } catch(e) { 
+                    this.reportQuery[key].res = []; 
+                    this.reportQuery[key].msg = e; 
+                    console.log( 'getDATA - ERROR: ' + e);
+                }
             }
         }
 
