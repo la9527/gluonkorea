@@ -206,6 +206,10 @@ class ReportExcelPage extends Component {
             for ( let posX of sameMergeRowsPos ) {
                 mergeFind( colNames[posX] ).map( (el) => {
                     sheet.addSpan( startY + el.startPos, startX + posX, el.depth, 1, GC.Spread.Sheets.SheetArea.viewport );
+                    for ( let y = 0; y < el.depth; y++ ) {
+                        let item = sheet.getCell( startY + el.startPos + y, startX + posX );
+                        item.value( y === 0 ? el.data : 0 );
+                    }
                 });
             }
         }

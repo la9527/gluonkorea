@@ -24,6 +24,8 @@ let ReportDefine = () => {
                 excelTmplInfo: {
                     sheetName: '리포트',
                     viewSet: {
+                        'adver_nm': {x: 2, y: 4 },
+                        'biz_person': {x: 2, y: 5 },
                         'name': { x: 5, y: 4 },
                         'contact1': { x: 5, y: 5 },
                         'contact2': { x: 5, y: 6 }
