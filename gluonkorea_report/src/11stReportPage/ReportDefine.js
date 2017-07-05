@@ -33,11 +33,14 @@ let ReportDefine = () => {
                 }
             },
             {
-                title: '월별 집행 요약_1',
+                title: '월별 집행 요약_전월',
                 url: '/report11st/totalReport',
                 params: {
                     month: '',
                     sellerId: ''
+                },
+                updateFunc: (item) => {
+                    item.params.month = moment(item.params.month, "YYYYMM").subtract(1, 'month').format('YYYYMM');
                 },
                 excelTmplInfo: {
                     sheetName: '리포트',
@@ -51,14 +54,11 @@ let ReportDefine = () => {
                 }
             },
             {
-                title: '월별 집행 요약_2',
+                title: '월별 집행 요약_금월',
                 url: '/report11st/totalReport',
                 params: {
                     month: '',
                     sellerId: ''
-                },
-                updateFunc: (item) => {
-                    item.params.month = moment(item.params.month, "YYYYMM").subtract(1, 'month').format('YYYYMM');
                 },
                 excelTmplInfo: {
                     sheetName: '리포트',
@@ -199,7 +199,7 @@ let ReportDefine = () => {
                                 }
                             },
                             title: {
-                                text: 'ROI',
+                                text: 'ROAS',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -247,7 +247,7 @@ let ReportDefine = () => {
                                 }
                             }
                         }, {
-                            name: 'ROI',
+                            name: 'ROAS',
                             type: 'spline',
                             data: adROASItemCost,
                             dataLabels: {
@@ -312,7 +312,7 @@ let ReportDefine = () => {
                                 }
                             },
                             title: {
-                                text: 'ROI',
+                                text: 'ROAS',
                                 style: {
                                     color: Highcharts.getOptions().colors[1]
                                 }
@@ -360,7 +360,7 @@ let ReportDefine = () => {
                                 }
                             }
                         }, {
-                            name: 'ROI',
+                            name: 'ROAS',
                             type: 'spline',
                             data: adROASItemCost,
                             dataLabels: {
