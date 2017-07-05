@@ -199,16 +199,20 @@ class ReportExcelPage extends Component {
                         pos.data = el[ elName ];
                     }
                 });
+                if ( pos.depth > 1 ) {
+                    item.push( Object.assign( {}, pos ) );
+                }
                 return item;
             };
-            
+
             let colNames = Object.getOwnPropertyNames(dataset[0]);
+            let refItems = mergeFind( colNames[sameMergeRowsPos[0]] );
             for ( let posX of sameMergeRowsPos ) {
-                mergeFind( colNames[posX] ).map( (el) => {
+                refItems.map((el) => {
                     sheet.addSpan( startY + el.startPos, startX + posX, el.depth, 1, GC.Spread.Sheets.SheetArea.viewport );
-                    for ( let y = 0; y < el.depth; y++ ) {
+                    for ( let y = 1; y < el.depth; y++ ) {
                         let item = sheet.getCell( startY + el.startPos + y, startX + posX );
-                        item.value( y === 0 ? el.data : 0 );
+                        item.value( 0 );
                     }
                 });
             }
