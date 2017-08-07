@@ -85,7 +85,7 @@ let ReportDefine = () => {
                         startY: 60,
                         baseWidth: 8
                     },
-                    fixHeight: 2,
+                    fixHeight: 1,
                     addAuto: true,
                     sameMergeRowsPos: [ 0, 1 ]
                 }
